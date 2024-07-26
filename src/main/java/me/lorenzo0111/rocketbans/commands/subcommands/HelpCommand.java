@@ -25,7 +25,7 @@ public class HelpCommand extends SubCommand {
                 continue;
             }
 
-            sender.sendMessage(color(prefix + "&c/" + label + " " + subCommand.getUsage() + " &7- " + subCommand.getDescription()));
+            sender.sendMessage(color(prefix + "&c/rb " + subCommand.getUsage() + " &7- " + subCommand.getDescription()));
         }
 
         sender.sendMessage(color(prefix + "&c&m-------------------------------"));

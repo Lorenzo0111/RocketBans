@@ -27,35 +27,41 @@ public class RocketBansCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (args.length == 0) {
+        SubCommand subCommand = getSubCommand(label);
+
+        if (subCommand == null && args.length == 0) {
             this.runSubCommand(sender, getSubCommand("help"), label, args);
             return true;
         }
 
-        SubCommand subCommand = getSubCommand(args[0]);
-
-        if (subCommand.getMinArgs() > (args.length - 1)) {
-            sender.sendMessage(plugin.getPrefixed("invalid-usage").replace("%usage%", "/" + label + " " + subCommand.getUsage()));
+        if (subCommand != null) {
+            this.runSubCommand(sender, subCommand, label, args);
             return true;
         }
 
+        subCommand = getSubCommand(args[0]);
         String[] newArgs = new String[args.length - 1];
         System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-
-        if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
-            sender.sendMessage(plugin.getPrefixed("no-permission"));
-            return true;
-        }
 
         this.runSubCommand(sender, subCommand, label, newArgs);
         return true;
     }
 
     private void runSubCommand(CommandSender sender, SubCommand command, String label, String[] args) {
+        if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+            sender.sendMessage(plugin.getPrefixed("no-permission"));
+            return;
+        }
+
+        if (command.getMinArgs() > args.length) {
+            sender.sendMessage(plugin.getPrefixed("invalid-usage").replace("%usage%", "/rb " + command.getUsage()));
+            return;
+        }
+
         try {
             command.handle(sender, label, args);
         } catch (UsageException e) {
-            sender.sendMessage(plugin.getPrefixed("invalid-usage").replace("%usage%", "/" + label + " " + command.getUsage()));
+            sender.sendMessage(plugin.getPrefixed("invalid-usage").replace("%usage%", "/rb " + command.getUsage()));
         } catch (OnlyPlayersException e) {
             sender.sendMessage(plugin.getPrefixed("only-players"));
         } catch (Exception e) {
