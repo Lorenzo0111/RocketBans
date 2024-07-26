@@ -1,8 +1,10 @@
 package me.lorenzo0111.rocketbans.utils;
 
+import java.text.DateFormat;
 import java.util.concurrent.TimeUnit;
 
 public final class TimeUtils {
+    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
 
     public static long parseTime(String time) {
         long result = 0;
@@ -53,6 +55,10 @@ public final class TimeUtils {
             builder.append(seconds).append("s");
         }
         return builder.toString().trim();
+    }
+
+    public static String formatDate(long time) {
+        return DATE_FORMAT.format(time);
     }
 
 }

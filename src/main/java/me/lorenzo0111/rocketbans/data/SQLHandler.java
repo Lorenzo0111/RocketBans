@@ -96,6 +96,33 @@ public class SQLHandler {
         }, this.executor);
     }
 
+
+    public CompletableFuture<List<Ban>> getActiveBans() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Ban> bans = new ArrayList<>();
+
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `bans` WHERE active = true;");
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    bans.add(new Ban(
+                            set.getInt("id"),
+                            UUID.fromString(set.getString("uuid")),
+                            set.getString("reason"),
+                            UUID.fromString(set.getString("executor")),
+                            set.getTimestamp("date"),
+                            set.getTimestamp("expires"),
+                            set.getBoolean("active")
+                    ));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return bans;
+        }, this.executor);
+    }
+
     public void unban(UUID uuid) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = this.getConnection()) {
@@ -119,6 +146,19 @@ public class SQLHandler {
                 statement.setTimestamp(4, ban.date());
                 statement.setTimestamp(5, ban.expires());
                 statement.setBoolean(6, ban.active());
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }, this.executor);
+    }
+
+    public void expireBan(int id) {
+        CompletableFuture.runAsync(() -> {
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("UPDATE `bans` SET active = false WHERE id = ?;");
+                statement.setInt(1, id);
 
                 statement.executeUpdate();
             } catch (SQLException e) {

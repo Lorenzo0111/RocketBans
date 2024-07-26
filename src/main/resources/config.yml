@@ -50,4 +50,6 @@ messages:
   ban:
     permanent: "&c%player%&7 has been permanently banned for %reason%."
     temp: "&c%player%&7 has been banned for &c%duration%&7 for &c%reason%&7."
-  uban: "&c%player%&7 has been unbanned."
+  unban: "&c%player%&7 has been unbanned."
+  no-history: "&c%player%&7 has no ban history."
+  history: "&f&l» &c%type%&7 - &c%executor%&7 - &c%reason%&7 - &c%date%&7 - &c%duration%&7 - &c%status%"

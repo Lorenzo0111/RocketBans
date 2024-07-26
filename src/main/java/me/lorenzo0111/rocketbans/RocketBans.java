@@ -2,6 +2,7 @@ package me.lorenzo0111.rocketbans;
 
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
+import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -39,7 +40,7 @@ public final class RocketBans extends JavaPlugin {
 
 
         // ******** Tasks ********
-
+        new ActiveTask(this);
     }
 
 
