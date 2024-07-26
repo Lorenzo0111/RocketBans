@@ -51,5 +51,6 @@ messages:
     permanent: "&c%player%&7 has been permanently banned for %reason%."
     temp: "&c%player%&7 has been banned for &c%duration%&7 for &c%reason%&7."
   unban: "&c%player%&7 has been unbanned."
+  kick: "&c%player%&7 has been kicked for &c%reason%&7."
   no-history: "&c%player%&7 has no ban history."
   history: "&f&l» &c%type%&7 - &c%executor%&7 - &c%reason%&7 - &c%date%&7 - &c%duration%&7 - &c%status%"

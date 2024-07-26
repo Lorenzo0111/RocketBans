@@ -9,3 +9,4 @@ commands:
       - rb
       - ban
       - unban
+      - kick

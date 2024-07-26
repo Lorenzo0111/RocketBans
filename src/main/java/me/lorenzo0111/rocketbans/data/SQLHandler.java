@@ -58,6 +58,15 @@ public class SQLHandler {
                 "PRIMARY KEY (`id`)" +
                 ");");
 
+        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `kick` (" +
+                "`id` INT NOT NULL AUTO_INCREMENT, " +
+                "`uuid` VARCHAR(36) NOT NULL," +
+                "`reason` TEXT NOT NULL," +
+                "`executor` VARCHAR(36) NOT NULL," +
+                "`date` DATETIME NOT NULL," +
+                "PRIMARY KEY (`id`)" +
+                ");");
+
         connection.close();
     }
 
@@ -159,6 +168,22 @@ public class SQLHandler {
             try (Connection connection = this.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement("UPDATE `bans` SET active = false WHERE id = ?;");
                 statement.setInt(1, id);
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }, this.executor);
+    }
+
+    public void addKick(Kick kick) {
+        CompletableFuture.runAsync(() -> {
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO `kick` (uuid, reason, executor, date) VALUES (?, ?, ?, ?);");
+                statement.setString(1, kick.uuid().toString());
+                statement.setString(2, kick.reason());
+                statement.setString(3, kick.executor().toString());
+                statement.setTimestamp(4, kick.date());
 
                 statement.executeUpdate();
             } catch (SQLException e) {

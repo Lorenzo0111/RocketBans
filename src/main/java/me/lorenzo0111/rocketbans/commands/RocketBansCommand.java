@@ -24,6 +24,7 @@ public class RocketBansCommand implements TabExecutor {
         register(new BanCommand(this));
         register(new UnbanCommand(this));
         register(new HistoryCommand(this));
+        register(new KickCommand(this));
     }
 
     @Override
