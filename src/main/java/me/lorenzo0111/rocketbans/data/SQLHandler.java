@@ -58,12 +58,23 @@ public class SQLHandler {
                 "PRIMARY KEY (`id`)" +
                 ");");
 
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `kick` (" +
+        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `kicks` (" +
                 "`id` INT NOT NULL AUTO_INCREMENT, " +
                 "`uuid` VARCHAR(36) NOT NULL," +
                 "`reason` TEXT NOT NULL," +
                 "`executor` VARCHAR(36) NOT NULL," +
                 "`date` DATETIME NOT NULL," +
+                "PRIMARY KEY (`id`)" +
+                ");");
+
+        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `mutes` (" +
+                "`id` INT NOT NULL AUTO_INCREMENT, " +
+                "`uuid` VARCHAR(36) NOT NULL," +
+                "`reason` TEXT NOT NULL," +
+                "`executor` VARCHAR(36) NOT NULL," +
+                "`date` DATETIME NOT NULL," +
+                "`expires` DATETIME," +
+                "`active` BOOLEAN NOT NULL," +
                 "PRIMARY KEY (`id`)" +
                 ");");
 
@@ -179,11 +190,29 @@ public class SQLHandler {
     public void addKick(Kick kick) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `kick` (uuid, reason, executor, date) VALUES (?, ?, ?, ?);");
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO `kicks` (uuid, reason, executor, date) VALUES (?, ?, ?, ?);");
                 statement.setString(1, kick.uuid().toString());
                 statement.setString(2, kick.reason());
                 statement.setString(3, kick.executor().toString());
                 statement.setTimestamp(4, kick.date());
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }, this.executor);
+    }
+
+    public void addMute(Mute mute) {
+        CompletableFuture.runAsync(() -> {
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO `mutes` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);");
+                statement.setString(1, mute.uuid().toString());
+                statement.setString(2, mute.reason());
+                statement.setString(3, mute.executor().toString());
+                statement.setTimestamp(4, mute.date());
+                statement.setTimestamp(5, mute.expires());
+                statement.setBoolean(6, mute.active());
 
                 statement.executeUpdate();
             } catch (SQLException e) {
