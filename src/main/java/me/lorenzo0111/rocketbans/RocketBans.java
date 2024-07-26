@@ -1,5 +1,6 @@
 package me.lorenzo0111.rocketbans;
 
+import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -11,6 +12,7 @@ import java.util.List;
 public final class RocketBans extends JavaPlugin {
     private static RocketBans instance;
     private boolean firstRun = true;
+    private SQLHandler database;
 
     @Override
     public void onEnable() {
@@ -23,6 +25,7 @@ public final class RocketBans extends JavaPlugin {
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
 
+        this.database = new SQLHandler(this);
 
         this.reload();
         this.firstRun = false;
@@ -39,13 +42,12 @@ public final class RocketBans extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-
+            this.getDatabase().close();
         } catch (Exception e) {
             e.printStackTrace();
             this.log("&cAn error occurred while disabling the plugin.");
             this.log("&cError: " + e.getMessage());
         }
-
     }
 
     public void log(String message) {
@@ -93,7 +95,7 @@ public final class RocketBans extends JavaPlugin {
             this.log(" &7When you are done, run &c&n/rocketbans reload&7 to reload the plugin.");
         } else {
             try {
-
+                this.database.init();
                 this.log(" &cDatabase connection&7: &a&lSUCCESS");
             } catch (Exception e) {
                 this.log(" &cAn error occurred while connecting to the database.");
@@ -107,9 +109,11 @@ public final class RocketBans extends JavaPlugin {
         this.log("&c&m---------------------------------------------------");
     }
 
-
     public static RocketBans getInstance() {
         return instance;
     }
 
+    public SQLHandler getDatabase() {
+        return database;
+    }
 }
