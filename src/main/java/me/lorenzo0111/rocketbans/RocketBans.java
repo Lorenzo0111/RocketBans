@@ -1,5 +1,6 @@
 package me.lorenzo0111.rocketbans;
 
+import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
@@ -30,6 +31,7 @@ public final class RocketBans extends JavaPlugin {
         this.reload();
         this.firstRun = false;
 
+        this.getCommand("rocketbans").setExecutor(new RocketBansCommand(this));
 
         // ******** Listeners ********
 
