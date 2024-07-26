@@ -9,7 +9,8 @@ public record Ban(
         String reason,
         UUID executor,
         Timestamp date,
-        Timestamp expires
+        Timestamp expires,
+        boolean active
 ) {
     boolean expired() {
         return System.currentTimeMillis() > expires.getTime();

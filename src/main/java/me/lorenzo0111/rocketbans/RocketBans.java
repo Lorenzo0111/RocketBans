@@ -9,8 +9,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 public final class RocketBans extends JavaPlugin {
+    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private static RocketBans instance;
     private boolean firstRun = true;
     private SQLHandler database;

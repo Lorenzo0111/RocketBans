@@ -8,3 +8,4 @@ commands:
     aliases:
       - rb
       - ban
+      - unban

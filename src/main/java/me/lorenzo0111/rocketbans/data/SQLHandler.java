@@ -53,19 +53,27 @@ public class SQLHandler {
                 "`reason` TEXT NOT NULL," +
                 "`executor` VARCHAR(36) NOT NULL," +
                 "`date` DATETIME NOT NULL," +
-                "`expires` DATETIME NOT NULL," +
+                "`expires` DATETIME," +
+                "`active` BOOLEAN NOT NULL," +
                 "PRIMARY KEY (`id`)" +
                 ");");
 
         connection.close();
     }
 
-    public CompletableFuture<List<Ban>> getBans(UUID uuid) {
+    public CompletableFuture<List<Ban>> getBans(UUID uuid, boolean onlyActive) {
         return CompletableFuture.supplyAsync(() -> {
             List<Ban> bans = new ArrayList<>();
 
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `bans` WHERE uuid = ?;");
+                StringBuilder query = new StringBuilder("SELECT * FROM `bans` WHERE uuid = ?");
+                if (onlyActive) {
+                    query.append(" AND active = true");
+                }
+
+                query.append(";");
+
+                PreparedStatement statement = connection.prepareStatement(query.toString());
                 statement.setString(1, uuid.toString());
 
                 ResultSet set = statement.executeQuery();
@@ -76,7 +84,8 @@ public class SQLHandler {
                             set.getString("reason"),
                             UUID.fromString(set.getString("executor")),
                             set.getTimestamp("date"),
-                            set.getTimestamp("expires")
+                            set.getTimestamp("expires"),
+                            set.getBoolean("active")
                     ));
                 }
             } catch (SQLException e) {
@@ -87,15 +96,29 @@ public class SQLHandler {
         }, this.executor);
     }
 
+    public void unban(UUID uuid) {
+        CompletableFuture.runAsync(() -> {
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("UPDATE `bans` SET active = false WHERE uuid = ?;");
+                statement.setString(1, uuid.toString());
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }, this.executor);
+    }
+
     public void addBan(Ban ban) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `bans` (uuid, reason, executor, date, expires) VALUES (?, ?, ?, ?, ?);");
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO `bans` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);");
                 statement.setString(1, ban.uuid().toString());
                 statement.setString(2, ban.reason());
                 statement.setString(3, ban.executor().toString());
                 statement.setTimestamp(4, ban.date());
                 statement.setTimestamp(5, ban.expires());
+                statement.setBoolean(6, ban.active());
 
                 statement.executeUpdate();
             } catch (SQLException e) {

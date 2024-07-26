@@ -47,3 +47,7 @@ messages:
   invalid-usage: "&7Invalid usage. Please use &c&n%usage%&7."
   error: "&cAn error occurred while executing this command. Error: %error%"
   reload: "&7The plugin has been reloaded."
+  ban:
+    permanent: "&c%player%&7 has been permanently banned for %reason%."
+    temp: "&c%player%&7 has been banned for &c%duration%&7 for &c%reason%&7."
+  uban: "&c%player%&7 has been unbanned."

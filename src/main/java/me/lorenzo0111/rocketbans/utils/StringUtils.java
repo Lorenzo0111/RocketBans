@@ -28,4 +28,8 @@ public final class StringUtils {
                 .collect(Collectors.toList());
     }
 
+    public static String or(String message, String other) {
+        return message == null ? other : message;
+    }
+
 }

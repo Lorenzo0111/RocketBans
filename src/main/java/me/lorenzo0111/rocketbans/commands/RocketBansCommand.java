@@ -3,9 +3,7 @@ package me.lorenzo0111.rocketbans.commands;
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.exceptions.OnlyPlayersException;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.commands.subcommands.HelpCommand;
-import me.lorenzo0111.rocketbans.commands.subcommands.NotFoundCommand;
-import me.lorenzo0111.rocketbans.commands.subcommands.ReloadCommand;
+import me.lorenzo0111.rocketbans.commands.subcommands.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -23,6 +21,8 @@ public class RocketBansCommand implements TabExecutor {
 
         register(new HelpCommand(this));
         register(new ReloadCommand(this));
+        register(new BanCommand(this));
+        register(new UnbanCommand(this));
     }
 
     @Override
