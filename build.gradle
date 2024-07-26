@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id "io.github.goooler.shadow" version "8.1.8"
+}
+
+group = 'me.lorenzo0111'
+version = '1.0-SNAPSHOT'
+
+String libsBase = "${group}.rocketbans.libs"
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "CodeMC"
+        url = "https://repo.codemc.io/repository/maven-public/"
+    }
+    maven {
+        name = "xenondevs"
+        url = "https://repo.xenondevs.xyz/releases"
+    }
+    maven { url = "https://repo.onarandombox.com/content/groups/public/" }
+}
+
+dependencies {
+    compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
+    implementation 'com.zaxxer:HikariCP:4.0.3'
+    implementation 'xyz.xenondevs.invui:invui:1.32'
+}
+
+
+shadowJar {
+    archiveClassifier.set("")
+
+    relocate("com.zaxxer.hikari", "${libsBase}.hikari")
+    relocate("xyz.xenondevs.invui", "${libsBase}.libs.invui")
+    relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.libs.inventoryaccess")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+tasks.build.dependsOn tasks.shadowJar

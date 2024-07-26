@@ -1,0 +1,49 @@
+mysql:
+  host: "localhost"
+  port: 3306
+  username: "root"
+  password: "example"
+  database: "rocketbans"
+  ssl: false
+
+menus:
+  items:
+    previous:
+      type: "ARROW"
+      name: "&cPrevious page"
+      lore:
+        has:
+          - "&7Click to go to page &c%page%&7/&c%pages%&7."
+        has_not:
+          - "&cYou are on the first page."
+    next:
+      type: "ARROW"
+      name: "&aNext page"
+      lore:
+        has:
+          - "&7Click to go to page &e%page%&7/&e%pages%&7."
+        has_not:
+          - "&cYou are on the last page."
+
+    custom:
+      '#':
+        type: "BLACK_STAINED_GLASS_PANE"
+        name: "&r"
+
+  example:
+    title: "&7Example"
+    structure:
+      - "# # # # # # # # #"
+      - "# . . . . . . . #"
+      - "# . . . . . . . #"
+      - "# . . . . . . . #"
+      - "# # # # # # # # #"
+
+messages:
+  prefix: "&c&lRocket&e&lBans &f&l» &7"
+  not-found: "&cThe command you entered was not found."
+  only-players: "&cOnly players can use this command."
+  no-permission: "&cYou do not have permission to use this command."
+  invalid-usage: "&7Invalid usage. Please use &c&n%usage%&7."
+  error: "&cAn error occurred while executing this command. Error: %error%"
+  reload: "&7The plugin has been reloaded."
