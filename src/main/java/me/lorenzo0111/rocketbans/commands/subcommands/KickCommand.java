@@ -29,7 +29,8 @@ public class KickCommand extends SubCommand {
 
         if (args.length > 1) {
             reason = new StringBuilder();
-            for (int i = 1; i < args.length; i++) {
+            for (int i = 1; i < (args[args.length - 1].equalsIgnoreCase("-s") ?
+                    args.length - 1 : args.length); i++) {
                 reason.append(args[i]).append(" ");
             }
         }
@@ -47,10 +48,15 @@ public class KickCommand extends SubCommand {
         plugin.getDatabase().add(kick);
         target.kickPlayer(kick.reason());
 
-        sender.sendMessage(plugin.getPrefixed("kick")
+        String message = plugin.getPrefixed("kick")
                 .replace("%player%", target.getName())
-                .replace("%reason%", kick.reason())
-        );
+                .replace("%reason%", kick.reason());
+
+        if (args[args.length - 1].equalsIgnoreCase("-s")) {
+            sender.sendMessage(message);
+        } else {
+            Bukkit.broadcastMessage(message);
+        }
     }
 
     @Override

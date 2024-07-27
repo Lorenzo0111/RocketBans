@@ -2,6 +2,7 @@ package me.lorenzo0111.rocketbans.api.data.records;
 
 import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -12,7 +13,7 @@ public record Ban(
         String reason,
         UUID executor,
         Timestamp date,
-        Timestamp expires,
+        @Nullable Timestamp expires,
         boolean active
 ) implements HistoryRecord, ExpiringRecord {
 

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.PagedGui;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.AbstractItemBuilder;
@@ -36,7 +37,6 @@ public class NavigationItem extends ControlItem<PagedGui<?>> {
             builder = new ItemBuilder(type);
         }
 
-
         builder.setDisplayName(
                 replacePlaceholders(
                         plugin.getMessage("menus.items." + (forward ? "next" : "previous") + ".name", false)
@@ -62,7 +62,7 @@ public class NavigationItem extends ControlItem<PagedGui<?>> {
     }
 
     @Override
-    public void handleClick(ClickType clickType, Player player, InventoryClickEvent event) {
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
         if (clickType == ClickType.LEFT) {
             if (forward) {
                 getGui().goForward();

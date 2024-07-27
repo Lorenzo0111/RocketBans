@@ -4,8 +4,10 @@ import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -25,12 +27,16 @@ public class UnbanCommand extends SubCommand {
         sender.sendMessage(plugin.getPrefixed("unban").replace("%player%",
                 StringUtils.or(target.getName(), args[0])));
 
-        Bukkit.getBannedPlayers().remove(target);
+        ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
+                .pardon(target.getPlayerProfile());
     }
 
     @Override
     public List<String> handleTabCompletion(CommandSender sender, String[] args) {
-        return Bukkit.getBannedPlayers().stream().map(OfflinePlayer::getName).toList();
+        return ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
+                .getEntries().stream()
+                .map(entry -> entry.getBanTarget().getName())
+                .toList();
     }
 
     @Override

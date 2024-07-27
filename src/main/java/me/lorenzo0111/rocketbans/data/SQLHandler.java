@@ -95,7 +95,7 @@ public class SQLHandler {
                 set.close();
                 statement.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                plugin.logException(e);
             }
 
             return results;
@@ -117,7 +117,7 @@ public class SQLHandler {
                 set.close();
                 statement.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                plugin.logException(e);
             }
 
             return results;
@@ -136,7 +136,7 @@ public class SQLHandler {
                 statement.executeUpdate();
                 statement.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                plugin.logException(e);
             }
         }, this.executor);
     }
@@ -178,7 +178,7 @@ public class SQLHandler {
 
                 return res;
             } catch (SQLException e) {
-                e.printStackTrace();
+                plugin.logException(e);
             }
 
             return -1;
@@ -196,7 +196,7 @@ public class SQLHandler {
 
                 statement.executeUpdate();
             } catch (SQLException e) {
-                e.printStackTrace();
+                plugin.logException(e);
             }
         }, this.executor);
     }
@@ -241,5 +241,9 @@ public class SQLHandler {
         }
 
         return connection;
+    }
+
+    public Executor getExecutor() {
+        return executor;
     }
 }

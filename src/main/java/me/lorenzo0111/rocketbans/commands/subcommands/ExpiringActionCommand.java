@@ -1,11 +1,11 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.api.data.Table;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
-import me.lorenzo0111.rocketbans.api.data.Table;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -45,7 +45,9 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
             if (duration <= 0) duration = -1;
 
             reason = new StringBuilder();
-            for (int i = duration == -1 ? 1 : 2; i < args.length; i++) {
+            for (int i = duration == -1 ? 1 : 2;
+                 i < (args[args.length - 1].equalsIgnoreCase("-s") ?
+                         args.length - 1 : args.length); i++) {
                 reason.append(args[i]).append(" ");
             }
         }
@@ -68,17 +70,23 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
         plugin.getDatabase().add(item)
                 .thenAccept(id -> action.accept((T) item.withId(id), target));
 
+        String message;
+
         if (duration == -1)
-            sender.sendMessage(plugin.getPrefixed(name + ".permanent")
+            message = plugin.getPrefixed(name + ".permanent")
                     .replace("%player%", target.getName())
-                    .replace("%reason%", item.reason())
-            );
+                    .replace("%reason%", item.reason());
         else
-            sender.sendMessage(plugin.getPrefixed(name + ".temp")
+            message = plugin.getPrefixed(name + ".temp")
                     .replace("%player%", target.getName())
                     .replace("%reason%", item.reason())
-                    .replace("%duration%", TimeUtils.formatTime(duration))
-            );
+                    .replace("%duration%", TimeUtils.formatTime(duration));
+
+        if (args[args.length - 1].equalsIgnoreCase("-s")) {
+            sender.sendMessage(message);
+        } else {
+            Bukkit.broadcastMessage(message);
+        }
     }
 
     @Override

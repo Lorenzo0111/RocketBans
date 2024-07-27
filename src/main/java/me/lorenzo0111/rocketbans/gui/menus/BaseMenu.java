@@ -27,6 +27,7 @@ public abstract class BaseMenu {
     private final List<Item> content = new ArrayList<>();
     private final boolean paginated;
 
+    @SuppressWarnings("ConstantConditions")
     public BaseMenu(String id, boolean paginated) {
         this.id = id;
         this.paginated = paginated;

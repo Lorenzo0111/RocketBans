@@ -33,7 +33,8 @@ public class RocketBansCommand implements TabExecutor {
         register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> player.ban(
                 ban.reason(),
                 ban.expires(),
-                ban.executor().toString()
+                ban.executor().toString(),
+                true
         )));
         register(new ExpiringActionCommand<>(this, "mute", Mute.class, (mute, player) ->
                 plugin.getMuteManager().addMute(mute)));

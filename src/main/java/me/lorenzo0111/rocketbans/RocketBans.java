@@ -3,19 +3,27 @@ package me.lorenzo0111.rocketbans;
 import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
+import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
+import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 public final class RocketBans extends JavaPlugin implements RocketBansAPI {
     private static RocketBans instance;
@@ -24,6 +32,7 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
     private MuteManager muteManager;
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     public void onEnable() {
         instance = this;
 
@@ -40,6 +49,7 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         this.reload();
         this.firstRun = false;
 
+        // ******** Commands ********
         this.getCommand("rocketbans").setExecutor(new RocketBansCommand(this));
 
         // ******** Listeners ********
@@ -55,15 +65,17 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         try {
             this.getDatabase().close();
         } catch (Exception e) {
-            e.printStackTrace();
-            this.log("&cAn error occurred while disabling the plugin.");
-            this.log("&cError: " + e.getMessage());
+            this.logException(e);
         }
     }
 
     public void log(String message) {
         ConsoleCommandSender logger = Bukkit.getConsoleSender();
         logger.sendMessage(StringUtils.color(getMessage("prefix") + message));
+    }
+
+    public void logException(Throwable e) {
+        this.getLogger().log(Level.SEVERE, "An unexpected error occurred", e);
     }
 
     public String getMessage(String path, boolean messagesSection) {
@@ -91,7 +103,6 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
                 this.getConfig().getString("messages." + path, "&cUnable to find the following key: &7" + path + "&c.")
         );
     }
-
 
     public void reload() {
         this.reloadConfig();
@@ -137,6 +148,18 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
     @Override
     public <T extends HistoryRecord> void punish(T item) {
         database.add(item);
+
+        if (item instanceof Mute)
+            muteManager.addMute((Mute) item);
+
+        if (item instanceof Ban ban)
+            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
+                    .addBan(
+                            Bukkit.getOfflinePlayer(item.uuid()).getPlayerProfile(),
+                            item.reason(),
+                            ban.expires(),
+                            ban.executor().toString()
+                    );
     }
 
     @Override
@@ -147,7 +170,8 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
             muteManager.removeMutes(uuid);
 
         if (type.equals(Ban.class))
-            Bukkit.getBannedPlayers().remove(Bukkit.getOfflinePlayer(uuid));
+            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
+                    .pardon(Bukkit.getOfflinePlayer(uuid).getPlayerProfile());
     }
 
     @Override
@@ -158,5 +182,23 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
             muteManager.getMutes().values()
                     .stream().filter(m -> m.id() == id)
                     .findFirst().ifPresent(mute -> muteManager.removeMutes(mute.uuid()));
+    }
+
+    @Override
+    public CompletableFuture<List<HistoryRecord>> history(@Nullable Class<? extends HistoryRecord> type, UUID uuid) {
+        if (type != null)
+            return database.get(type, uuid, false)
+                    .thenApply(ArrayList::new);
+
+        return CompletableFuture.supplyAsync(() -> {
+            List<HistoryRecord> records = new ArrayList<>();
+
+            records.addAll(database.get(Ban.class, uuid, false).join());
+            records.addAll(database.get(Mute.class, uuid, false).join());
+            records.addAll(database.get(Warn.class, uuid, false).join());
+            records.addAll(database.get(Kick.class, uuid, false).join());
+
+            return records;
+        }, database.getExecutor());
     }
 }

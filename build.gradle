@@ -31,8 +31,8 @@ repositories {
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
-    implementation 'com.zaxxer:HikariCP:4.0.3'
-    implementation 'xyz.xenondevs.invui:invui:1.32'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'xyz.xenondevs.invui:invui:1.33'
 
     implementation project(":api")
 }
@@ -42,8 +42,8 @@ shadowJar {
     archiveClassifier.set("")
 
     relocate("com.zaxxer.hikari", "${libsBase}.hikari")
-    relocate("xyz.xenondevs.invui", "${libsBase}.libs.invui")
-    relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.libs.inventoryaccess")
+    relocate("xyz.xenondevs.invui", "${libsBase}.invui")
+    relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.inventoryaccess")
 }
 
 tasks.withType(JavaCompile).configureEach {
