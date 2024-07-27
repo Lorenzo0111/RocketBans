@@ -1,11 +1,12 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
+import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -46,7 +47,18 @@ public class KickCommand extends SubCommand {
         );
 
         plugin.getDatabase().add(kick);
-        target.kickPlayer(kick.reason());
+        target.kickPlayer(String.join("\n",
+                plugin.getMessages("screens.kick")
+                        .stream()
+                        .map(s -> s.replace("%id%", String.valueOf(kick.id()))
+                                .replace("%executor%", StringUtils.or(
+                                        kick.executor().equals(RocketBans.CONSOLE_UUID) ? "Console" :
+                                                Bukkit.getOfflinePlayer(kick.executor()).getName(), "Unknown"))
+                                .replace("%reason%", kick.reason())
+                                .replace("%date%", TimeUtils.formatDate(kick.date().getTime()))
+                        )
+                        .toList()
+        ));
 
         String message = plugin.getPrefixed("kick")
                 .replace("%player%", target.getName())

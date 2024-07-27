@@ -8,6 +8,7 @@ import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
+import me.lorenzo0111.rocketbans.listeners.PlayerListener;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
@@ -54,6 +55,7 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
 
         // ******** Listeners ********
         this.getServer().getPluginManager().registerEvents(this.muteManager, this);
+        this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 
         // ******** Tasks ********
         new ActiveTask(this);

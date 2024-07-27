@@ -76,3 +76,16 @@ messages:
   history: "&f&l» &c%type%&7 - &c%executor%&7 - &c%reason%&7 - &c%date%&7 - &c%duration%&7 - &c%status%"
   invalid-type: "&cThe type you entered was not found."
   deleted: "&7The record has been deleted."
+  screens:
+    ban:
+      - "&7&m-------------------"
+      - "&c&lRocket&e&lBans"
+      - "&7You have been &cbanned for &c%reason%&7."
+      - "&7Duration: &c%duration%&7."
+      - "&7Date: &c%date%&7."
+      - "&7&m-------------------"
+    kick:
+      - "&7&m-------------------"
+      - "&c&lRocket&e&lBans"
+      - "&7You have been &ckicked for &c%reason%&7."
+      - "&7&m-------------------"

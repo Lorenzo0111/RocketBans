@@ -3,6 +3,7 @@ package me.lorenzo0111.rocketbans.tasks;
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
+import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class ActiveTask extends BukkitRunnable {
@@ -22,9 +23,15 @@ public class ActiveTask extends BukkitRunnable {
             }
         });
 
-        this.plugin.getDatabase().getActive(Mute.class).thenAccept(bans -> {
-            for (Mute mute : bans) {
+        this.plugin.getDatabase().getActive(Mute.class).thenAccept(mutes -> {
+            for (Mute mute : mutes) {
                 if (mute.expired()) mute.expire();
+            }
+        });
+
+        this.plugin.getDatabase().getActive(Warn.class).thenAccept(warns -> {
+            for (Warn warn : warns) {
+                if (warn.expired()) warn.expire();
             }
         });
     }
