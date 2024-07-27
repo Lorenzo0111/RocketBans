@@ -84,9 +84,9 @@ public class SQLHandler {
             if (table == null) return results;
 
             try (Connection connection = this.getConnection()) {
-                String query = "SELECT * FROM `%s` WHERE uuid = ?%s";
+                String query = "SELECT * FROM `%s` WHERE uuid = ?%s ORDER BY date DESC;";
 
-                PreparedStatement statement = connection.prepareStatement(String.format(query, table, onlyActive ? " AND active = true;" : ";"));
+                PreparedStatement statement = connection.prepareStatement(String.format(query, table, onlyActive ? " AND active = true" : ""));
                 statement.setString(1, uuid.toString());
 
                 ResultSet set = statement.executeQuery();
@@ -109,7 +109,7 @@ public class SQLHandler {
             if (table == null) return results;
 
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `" + table + "` WHERE active = true;");
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `" + table + "` WHERE active = true ORDER BY date DESC;");
                 ResultSet set = statement.executeQuery();
 
                 results.addAll(this.deserialize(type, set));
@@ -192,6 +192,22 @@ public class SQLHandler {
 
             try (Connection connection = this.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement("UPDATE `" + table + "` SET active = false WHERE id = ?;");
+                statement.setInt(1, id);
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                plugin.logException(e);
+            }
+        }, this.executor);
+    }
+
+    public <T extends HistoryRecord> void delete(Class<T> type, int id) {
+        CompletableFuture.runAsync(() -> {
+            Table table = Table.fromClass(type);
+            if (table == null) return;
+
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + table + "` WHERE id = ?;");
                 statement.setInt(1, id);
 
                 statement.executeUpdate();

@@ -32,16 +32,12 @@ public enum Table {
 
     @SuppressWarnings("unchecked")
     public <T extends HistoryRecord> T create(Object... items) {
-        Object[] newItems = new Object[items.length];
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] == null) {
-                break;
-            }
-            newItems[i] = items[i];
-        }
+        Constructor<?> constructor = this.clazz.getConstructors()[0];
+
+        Object[] newItems = new Object[constructor.getParameterCount()];
+        System.arraycopy(items, 0, newItems, 0, newItems.length);
 
         try {
-            Constructor<?> constructor = this.clazz.getConstructors()[0];
             return (T) constructor.newInstance(newItems);
         } catch (Exception e) {
             throw new RuntimeException(e);

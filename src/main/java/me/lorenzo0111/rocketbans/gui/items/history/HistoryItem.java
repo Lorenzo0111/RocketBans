@@ -23,8 +23,17 @@ public class HistoryItem extends ConfiguredItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        if (record instanceof ExpiringRecord expiring && !expiring.expired())
+        if (clickType.isLeftClick() && record instanceof ExpiringRecord expiring &&
+                !expiring.expired()) {
             expiring.expire();
+            player.closeInventory();
+        }
+
+        if (clickType.equals(ClickType.DROP) && player.hasPermission("rocketbans.delete")) {
+            player.closeInventory();
+            plugin.getDatabase().delete(record.getClass(), record.id());
+            player.sendMessage(plugin.getPrefixed("deleted"));
+        }
     }
 
     @Override

@@ -74,3 +74,5 @@ messages:
   kick: "&c%player%&7 has been kicked for &c%reason%&7."
   no-history: "&c%player%&7 has no %type% history."
   history: "&f&l» &c%type%&7 - &c%executor%&7 - &c%reason%&7 - &c%date%&7 - &c%duration%&7 - &c%status%"
+  invalid-type: "&cThe type you entered was not found."
+  deleted: "&7The record has been deleted."

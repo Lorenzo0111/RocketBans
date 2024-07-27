@@ -64,7 +64,8 @@ public class HistoryCommand extends SubCommand {
 
                     if (items.isEmpty()) {
                         sender.sendMessage(plugin.getPrefixed("no-history")
-                                .replace("%type%", table.toString()));
+                                .replace("%type%", table.toString())
+                                .replace("%player%", StringUtils.or(target.getName(), "Unknown")));
                         return;
                     }
 
