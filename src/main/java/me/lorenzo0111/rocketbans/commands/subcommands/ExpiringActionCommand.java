@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand {
@@ -78,6 +79,11 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
                     .replace("%reason%", item.reason())
                     .replace("%duration%", TimeUtils.formatTime(duration))
             );
+    }
+
+    @Override
+    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+        return playerNames();
     }
 
     @Override

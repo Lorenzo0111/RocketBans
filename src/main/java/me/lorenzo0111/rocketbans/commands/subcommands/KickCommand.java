@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 public class KickCommand extends SubCommand {
 
@@ -50,6 +51,11 @@ public class KickCommand extends SubCommand {
                 .replace("%player%", target.getName())
                 .replace("%reason%", kick.reason())
         );
+    }
+
+    @Override
+    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+        return playerNames();
     }
 
     @Override

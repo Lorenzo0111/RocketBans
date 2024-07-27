@@ -26,6 +26,7 @@ public class RocketBansCommand implements TabExecutor {
         register(new HelpCommand(this));
         register(new ReloadCommand(this));
         register(new UnbanCommand(this));
+        register(new UnmuteCommand(this));
         register(new HistoryCommand(this));
         register(new KickCommand(this));
         register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> player.ban(

@@ -1,7 +1,9 @@
 package me.lorenzo0111.rocketbans.commands;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,10 @@ public abstract class SubCommand {
 
     public List<String> handleTabCompletion(CommandSender sender, String[] args) {
         return new ArrayList<>();
+    }
+
+    protected List<String> playerNames() {
+        return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
     }
 
     public abstract String getName();

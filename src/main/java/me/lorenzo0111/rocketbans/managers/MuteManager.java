@@ -37,6 +37,10 @@ public class MuteManager implements Listener {
         activeMutes.remove(mute.uuid());
     }
 
+    public Map<UUID, Mute> getMutes() {
+        return activeMutes;
+    }
+
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         if (!activeMutes.containsKey(event.getPlayer().getUniqueId())) return;
