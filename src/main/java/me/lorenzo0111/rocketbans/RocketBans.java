@@ -1,6 +1,9 @@
 package me.lorenzo0111.rocketbans;
 
 import me.lorenzo0111.rocketbans.api.RocketBansAPI;
+import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
+import me.lorenzo0111.rocketbans.api.data.records.Ban;
+import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
@@ -15,7 +18,6 @@ import java.util.List;
 import java.util.UUID;
 
 public final class RocketBans extends JavaPlugin implements RocketBansAPI {
-    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private static RocketBans instance;
     private boolean firstRun = true;
     private SQLHandler database;
@@ -127,7 +129,34 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         return database;
     }
 
+    @Override
     public MuteManager getMuteManager() {
         return muteManager;
+    }
+
+    @Override
+    public <T extends HistoryRecord> void punish(T item) {
+        database.add(item);
+    }
+
+    @Override
+    public <T extends HistoryRecord> void expire(Class<T> type, UUID uuid) {
+        database.expireAll(type, uuid);
+
+        if (type.equals(Mute.class))
+            muteManager.removeMutes(uuid);
+
+        if (type.equals(Ban.class))
+            Bukkit.getBannedPlayers().remove(Bukkit.getOfflinePlayer(uuid));
+    }
+
+    @Override
+    public <T extends HistoryRecord> void expire(Class<T> type, int id) {
+        database.expireSingle(type, id);
+
+        if (type.equals(Mute.class))
+            muteManager.getMutes().values()
+                    .stream().filter(m -> m.id() == id)
+                    .findFirst().ifPresent(mute -> muteManager.removeMutes(mute.uuid()));
     }
 }

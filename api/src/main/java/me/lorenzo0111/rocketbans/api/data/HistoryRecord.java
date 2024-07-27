@@ -1,4 +1,4 @@
-package me.lorenzo0111.rocketbans.data;
+package me.lorenzo0111.rocketbans.api.data;
 
 import java.sql.Timestamp;
 import java.util.UUID;

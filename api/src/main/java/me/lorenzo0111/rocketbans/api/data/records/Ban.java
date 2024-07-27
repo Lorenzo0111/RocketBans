@@ -1,12 +1,12 @@
-package me.lorenzo0111.rocketbans.data.records;
+package me.lorenzo0111.rocketbans.api.data.records;
 
-import me.lorenzo0111.rocketbans.data.ExpiringRecord;
-import me.lorenzo0111.rocketbans.data.HistoryRecord;
+import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
-public record Warn(
+public record Ban(
         int id,
         UUID uuid,
         String reason,

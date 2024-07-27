@@ -2,7 +2,7 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
-import me.lorenzo0111.rocketbans.data.records.Ban;
+import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

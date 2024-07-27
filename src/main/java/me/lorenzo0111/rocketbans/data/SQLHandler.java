@@ -3,6 +3,9 @@ package me.lorenzo0111.rocketbans.data;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
+import me.lorenzo0111.rocketbans.api.data.Table;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 

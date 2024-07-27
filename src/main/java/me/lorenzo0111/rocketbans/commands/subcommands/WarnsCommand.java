@@ -3,7 +3,7 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.records.Warn;
+import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.gui.menus.HistoryMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

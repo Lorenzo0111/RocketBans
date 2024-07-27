@@ -4,7 +4,7 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.records.Kick;
+import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

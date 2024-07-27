@@ -1,9 +1,9 @@
-package me.lorenzo0111.rocketbans.data;
+package me.lorenzo0111.rocketbans.api.data;
 
-import me.lorenzo0111.rocketbans.data.records.Ban;
-import me.lorenzo0111.rocketbans.data.records.Kick;
-import me.lorenzo0111.rocketbans.data.records.Mute;
-import me.lorenzo0111.rocketbans.data.records.Warn;
+import me.lorenzo0111.rocketbans.api.data.records.Ban;
+import me.lorenzo0111.rocketbans.api.data.records.Kick;
+import me.lorenzo0111.rocketbans.api.data.records.Mute;
+import me.lorenzo0111.rocketbans.api.data.records.Warn;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

@@ -1,7 +1,6 @@
-package me.lorenzo0111.rocketbans.data;
+package me.lorenzo0111.rocketbans.api.data;
 
-import me.lorenzo0111.rocketbans.RocketBans;
-import me.lorenzo0111.rocketbans.data.records.Mute;
+import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,14 +22,7 @@ public interface ExpiringRecord extends HistoryRecord {
     }
 
     default void expire() {
-        RocketBans.getInstance()
-                .getDatabase()
-                .expireSingle(this.getClass(), id());
-
-        if (this instanceof Mute mute)
-            RocketBans.getInstance()
-                    .getMuteManager()
-                    .removeMute(mute);
+        RocketBansAPI.get().expire(this.getClass(), id());
     }
 
     @Contract("_ -> new")

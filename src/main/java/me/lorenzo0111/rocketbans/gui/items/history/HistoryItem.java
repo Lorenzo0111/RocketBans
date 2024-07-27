@@ -1,9 +1,9 @@
 package me.lorenzo0111.rocketbans.gui.items.history;
 
 import me.lorenzo0111.rocketbans.RocketBans;
-import me.lorenzo0111.rocketbans.data.ExpiringRecord;
-import me.lorenzo0111.rocketbans.data.HistoryRecord;
-import me.lorenzo0111.rocketbans.data.Table;
+import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
+import me.lorenzo0111.rocketbans.api.data.Table;
 import me.lorenzo0111.rocketbans.gui.items.ConfiguredItem;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
