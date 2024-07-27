@@ -1,5 +1,6 @@
 package me.lorenzo0111.rocketbans;
 
+import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
@@ -13,7 +14,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-public final class RocketBans extends JavaPlugin {
+public final class RocketBans extends JavaPlugin implements RocketBansAPI {
     public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private static RocketBans instance;
     private boolean firstRun = true;

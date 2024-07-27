@@ -23,7 +23,8 @@ public class HistoryItem extends ConfiguredItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-
+        if (record instanceof ExpiringRecord expiring && !expiring.expired())
+            expiring.expire();
     }
 
     @Override
