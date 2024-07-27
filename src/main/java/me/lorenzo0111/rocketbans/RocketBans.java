@@ -2,6 +2,7 @@ package me.lorenzo0111.rocketbans;
 
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
+import me.lorenzo0111.rocketbans.managers.MuteManager;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
@@ -17,6 +18,7 @@ public final class RocketBans extends JavaPlugin {
     private static RocketBans instance;
     private boolean firstRun = true;
     private SQLHandler database;
+    private MuteManager muteManager;
 
     @Override
     public void onEnable() {
@@ -30,6 +32,7 @@ public final class RocketBans extends JavaPlugin {
         this.saveConfig();
 
         this.database = new SQLHandler(this);
+        this.muteManager = new MuteManager(this);
 
         this.reload();
         this.firstRun = false;
@@ -37,7 +40,7 @@ public final class RocketBans extends JavaPlugin {
         this.getCommand("rocketbans").setExecutor(new RocketBansCommand(this));
 
         // ******** Listeners ********
-
+        this.getServer().getPluginManager().registerEvents(this.muteManager, this);
 
         // ******** Tasks ********
         new ActiveTask(this);
@@ -101,6 +104,7 @@ public final class RocketBans extends JavaPlugin {
         } else {
             try {
                 this.database.init();
+                this.muteManager.reload();
                 this.log(" &cDatabase connection&7: &a&lSUCCESS");
             } catch (Exception e) {
                 this.log(" &cAn error occurred while connecting to the database.");
@@ -120,5 +124,9 @@ public final class RocketBans extends JavaPlugin {
 
     public SQLHandler getDatabase() {
         return database;
+    }
+
+    public MuteManager getMuteManager() {
+        return muteManager;
     }
 }

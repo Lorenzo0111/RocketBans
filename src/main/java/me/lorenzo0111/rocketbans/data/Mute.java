@@ -24,5 +24,13 @@ public record Mute(
         RocketBans.getInstance()
                 .getDatabase()
                 .expireBan(this.id);
+
+        RocketBans.getInstance()
+                .getMuteManager()
+                .removeMute(this);
+    }
+
+    public Mute withId(int id) {
+        return new Mute(id, uuid, reason, executor, date, expires, active);
     }
 }

@@ -53,6 +53,7 @@ messages:
   mute:
     permanent: "&c%player%&7 has been permanently muted for %reason%."
     temp: "&c%player%&7 has been muted for &c%duration%&7 for &c%reason%&7."
+    deny: "&cYou are currently muted. You cannot send messages."
   unban: "&c%player%&7 has been unbanned."
   kick: "&c%player%&7 has been kicked for &c%reason%&7."
   no-history: "&c%player%&7 has no ban history."

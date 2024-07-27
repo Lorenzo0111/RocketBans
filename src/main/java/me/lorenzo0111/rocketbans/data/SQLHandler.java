@@ -143,6 +143,32 @@ public class SQLHandler {
         }, this.executor);
     }
 
+    public CompletableFuture<List<Mute>> getActiveMutes() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Mute> bans = new ArrayList<>();
+
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `mutes` WHERE active = true;");
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    bans.add(new Mute(
+                            set.getInt("id"),
+                            UUID.fromString(set.getString("uuid")),
+                            set.getString("reason"),
+                            UUID.fromString(set.getString("executor")),
+                            set.getTimestamp("date"),
+                            set.getTimestamp("expires"),
+                            set.getBoolean("active")
+                    ));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return bans;
+        }, this.executor);
+    }
+
     public void unban(UUID uuid) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = this.getConnection()) {
@@ -203,16 +229,33 @@ public class SQLHandler {
         }, this.executor);
     }
 
-    public void addMute(Mute mute) {
-        CompletableFuture.runAsync(() -> {
+    public CompletableFuture<Integer> addMute(Mute mute) {
+        return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `mutes` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);");
+                PreparedStatement statement = connection.prepareStatement(
+                        "INSERT INTO `mutes` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);",
+                        Statement.RETURN_GENERATED_KEYS);
                 statement.setString(1, mute.uuid().toString());
                 statement.setString(2, mute.reason());
                 statement.setString(3, mute.executor().toString());
                 statement.setTimestamp(4, mute.date());
                 statement.setTimestamp(5, mute.expires());
                 statement.setBoolean(6, mute.active());
+
+                return statement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return -1;
+        }, this.executor);
+    }
+
+    public void expireMute(int id) {
+        CompletableFuture.runAsync(() -> {
+            try (Connection connection = this.getConnection()) {
+                PreparedStatement statement = connection.prepareStatement("UPDATE `mutes` SET active = false WHERE id = ?;");
+                statement.setInt(1, id);
 
                 statement.executeUpdate();
             } catch (SQLException e) {

@@ -50,7 +50,8 @@ public class MuteCommand extends SubCommand {
                 true
         );
 
-        plugin.getDatabase().addMute(mute);
+        plugin.getDatabase().addMute(mute).thenAccept(id ->
+                plugin.getMuteManager().addMute(mute.withId(id)));
 
         if (duration == -1)
             sender.sendMessage(plugin.getPrefixed("mute.permanent")
