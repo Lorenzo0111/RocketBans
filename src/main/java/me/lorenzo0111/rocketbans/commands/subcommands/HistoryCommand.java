@@ -10,12 +10,15 @@ import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.data.records.Kick;
 import me.lorenzo0111.rocketbans.data.records.Mute;
 import me.lorenzo0111.rocketbans.data.records.Warn;
+import me.lorenzo0111.rocketbans.gui.menus.HistoryMenu;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HistoryCommand extends SubCommand {
@@ -28,6 +31,25 @@ public class HistoryCommand extends SubCommand {
     @Override
     public void handle(CommandSender sender, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+
+        if (args.length == 2 && args[1].equalsIgnoreCase("-m") && sender instanceof Player player) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                List<Ban> bans = plugin.getDatabase().get(Ban.class, target.getUniqueId(), false).join();
+                List<Mute> mutes = plugin.getDatabase().get(Mute.class, target.getUniqueId(), false).join();
+                List<Kick> kicks = plugin.getDatabase().get(Kick.class, target.getUniqueId(), false).join();
+                List<Warn> warns = plugin.getDatabase().get(Warn.class, target.getUniqueId(), false).join();
+
+                List<HistoryRecord> merged = new ArrayList<>();
+                merged.addAll(bans);
+                merged.addAll(mutes);
+                merged.addAll(kicks);
+                merged.addAll(warns);
+
+                new HistoryMenu(merged).open(player);
+            });
+            return;
+        }
+
         sendHistory(sender, target, Ban.class);
         sendHistory(sender, target, Mute.class);
         sendHistory(sender, target, Kick.class);
@@ -89,7 +111,7 @@ public class HistoryCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "history <player>";
+        return "history <player> [-m]";
     }
 
     @Override

@@ -3,18 +3,23 @@ package me.lorenzo0111.rocketbans.data;
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.data.records.Mute;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 
 public interface ExpiringRecord extends HistoryRecord {
 
+    @Nullable
+    @Contract(pure = true)
     Timestamp expires();
+
     boolean active();
 
     default boolean expired() {
-        if (expires() == null) return false;
+        Timestamp expires = expires();
+        if (expires == null) return false;
 
-        return expires().before(new Timestamp(System.currentTimeMillis()));
+        return expires.before(new Timestamp(System.currentTimeMillis()));
     }
 
     default void expire() {

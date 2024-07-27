@@ -29,19 +29,30 @@ menus:
         has_not:
           - "&cYou are on the last page."
 
+    history:
+      type: "PAPER"
+      name: "&7Record &c#%id%"
+      lore:
+        - "&7Type: &c%type%"
+        - "&7Executor: &c%executor%"
+        - "&7Reason: &c%reason%"
+        - "&7Date: &c%date%"
+        - "&7Duration: &c%duration%"
+        - "&7Status: &c%active%"
+
     custom:
       '#':
         type: "BLACK_STAINED_GLASS_PANE"
         name: "&r"
 
-  example:
-    title: "&7Example"
+  history:
+    title: "&7History"
     structure:
       - "# # # # # # # # #"
       - "# . . . . . . . #"
       - "# . . . . . . . #"
       - "# . . . . . . . #"
-      - "# # # # # # # # #"
+      - "# # # < # > # # #"
 
 messages:
   prefix: "&c&lRocket&e&lBans &f&l» &7"
