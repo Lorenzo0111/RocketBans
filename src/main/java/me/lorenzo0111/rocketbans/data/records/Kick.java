@@ -1,4 +1,6 @@
-package me.lorenzo0111.rocketbans.data;
+package me.lorenzo0111.rocketbans.data.records;
+
+import me.lorenzo0111.rocketbans.data.HistoryRecord;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -9,6 +11,6 @@ public record Kick(
         String reason,
         UUID executor,
         Timestamp date
-) {
+) implements HistoryRecord {
 
 }

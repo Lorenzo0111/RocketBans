@@ -4,7 +4,7 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.Kick;
+import me.lorenzo0111.rocketbans.data.records.Kick;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -43,7 +43,7 @@ public class KickCommand extends SubCommand {
                 new Timestamp(new Date().getTime())
         );
 
-        plugin.getDatabase().addKick(kick);
+        plugin.getDatabase().add(kick);
         target.kickPlayer(kick.reason());
 
         sender.sendMessage(plugin.getPrefixed("kick")
@@ -70,5 +70,10 @@ public class KickCommand extends SubCommand {
     @Override
     public String getUsage() {
         return "<player> [reason]";
+    }
+
+    @Override
+    public String getPermission() {
+        return "rocketbans.kick";
     }
 }

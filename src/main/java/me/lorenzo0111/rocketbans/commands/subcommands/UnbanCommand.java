@@ -2,6 +2,7 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
+import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,7 @@ public class UnbanCommand extends SubCommand {
     @Override
     public void handle(CommandSender sender, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        plugin.getDatabase().unban(target.getUniqueId());
+        plugin.getDatabase().expireAll(Ban.class, target.getUniqueId());
 
         sender.sendMessage(plugin.getPrefixed("unban").replace("%player%",
                 StringUtils.or(target.getName(), args[0])));
@@ -43,5 +44,10 @@ public class UnbanCommand extends SubCommand {
     @Override
     public String getUsage() {
         return "<player>";
+    }
+
+    @Override
+    public String getPermission() {
+        return "rocketbans.unban";
     }
 }

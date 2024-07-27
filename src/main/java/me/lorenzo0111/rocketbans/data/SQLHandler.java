@@ -47,7 +47,7 @@ public class SQLHandler {
         Connection connection = this.getConnection();
 
         Statement statement = connection.createStatement();
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `bans` (" +
+        String query = "CREATE TABLE IF NOT EXISTS `%s` (" +
                 "`id` INT NOT NULL AUTO_INCREMENT, " +
                 "`uuid` VARCHAR(36) NOT NULL," +
                 "`reason` TEXT NOT NULL," +
@@ -56,7 +56,10 @@ public class SQLHandler {
                 "`expires` DATETIME," +
                 "`active` BOOLEAN NOT NULL," +
                 "PRIMARY KEY (`id`)" +
-                ");");
+                ");";
+
+        statement.executeUpdate(String.format(query, Table.BANS));
+        statement.executeUpdate(String.format(query, Table.MUTES));
 
         statement.executeUpdate("CREATE TABLE IF NOT EXISTS `kicks` (" +
                 "`id` INT NOT NULL AUTO_INCREMENT, " +
@@ -67,112 +70,74 @@ public class SQLHandler {
                 "PRIMARY KEY (`id`)" +
                 ");");
 
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS `mutes` (" +
-                "`id` INT NOT NULL AUTO_INCREMENT, " +
-                "`uuid` VARCHAR(36) NOT NULL," +
-                "`reason` TEXT NOT NULL," +
-                "`executor` VARCHAR(36) NOT NULL," +
-                "`date` DATETIME NOT NULL," +
-                "`expires` DATETIME," +
-                "`active` BOOLEAN NOT NULL," +
-                "PRIMARY KEY (`id`)" +
-                ");");
-
         connection.close();
     }
 
-    public CompletableFuture<List<Ban>> getBans(UUID uuid, boolean onlyActive) {
+    public <T extends HistoryRecord> CompletableFuture<List<T>> get(Class<T> type, UUID uuid, boolean onlyActive) {
         return CompletableFuture.supplyAsync(() -> {
-            List<Ban> bans = new ArrayList<>();
+            List<T> results = new ArrayList<>();
+            Table table = Table.fromClass(type);
+            if (table == null) return results;
 
             try (Connection connection = this.getConnection()) {
-                StringBuilder query = new StringBuilder("SELECT * FROM `bans` WHERE uuid = ?");
-                if (onlyActive) {
-                    query.append(" AND active = true");
-                }
+                String query = "SELECT * FROM `%s` WHERE uuid = ?%s";
 
-                query.append(";");
-
-                PreparedStatement statement = connection.prepareStatement(query.toString());
+                PreparedStatement statement = connection.prepareStatement(String.format(query, table, onlyActive ? " AND active = true;" : ";"));
                 statement.setString(1, uuid.toString());
 
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
-                    bans.add(new Ban(
-                            set.getInt("id"),
+                    results.add(table.create(set.getInt("id"),
                             UUID.fromString(set.getString("uuid")),
                             set.getString("reason"),
                             UUID.fromString(set.getString("executor")),
                             set.getTimestamp("date"),
-                            set.getTimestamp("expires"),
-                            set.getBoolean("active")
-                    ));
+                            table.isExpiring() ? set.getTimestamp("expires") : null,
+                            table.isExpiring() ? set.getBoolean("active") : null));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
-            return bans;
+            return results;
         }, this.executor);
     }
 
-
-    public CompletableFuture<List<Ban>> getActiveBans() {
+    public <T extends HistoryRecord> CompletableFuture<List<T>> getActive(Class<T> type) {
         return CompletableFuture.supplyAsync(() -> {
-            List<Ban> bans = new ArrayList<>();
+            List<T> results = new ArrayList<>();
+            Table table = Table.fromClass(type);
+            if (table == null) return results;
 
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `bans` WHERE active = true;");
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `" + table + "` WHERE active = true;");
                 ResultSet set = statement.executeQuery();
+
                 while (set.next()) {
-                    bans.add(new Ban(
-                            set.getInt("id"),
+                    results.add(table.create(set.getInt("id"),
                             UUID.fromString(set.getString("uuid")),
                             set.getString("reason"),
                             UUID.fromString(set.getString("executor")),
                             set.getTimestamp("date"),
-                            set.getTimestamp("expires"),
-                            set.getBoolean("active")
-                    ));
+                            table.isExpiring() ? set.getTimestamp("expires") : null,
+                            table.isExpiring() ? set.getBoolean("active") : null));
                 }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
 
-            return bans;
+            return results;
         }, this.executor);
     }
 
-    public CompletableFuture<List<Mute>> getActiveMutes() {
-        return CompletableFuture.supplyAsync(() -> {
-            List<Mute> bans = new ArrayList<>();
-
-            try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM `mutes` WHERE active = true;");
-                ResultSet set = statement.executeQuery();
-                while (set.next()) {
-                    bans.add(new Mute(
-                            set.getInt("id"),
-                            UUID.fromString(set.getString("uuid")),
-                            set.getString("reason"),
-                            UUID.fromString(set.getString("executor")),
-                            set.getTimestamp("date"),
-                            set.getTimestamp("expires"),
-                            set.getBoolean("active")
-                    ));
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            return bans;
-        }, this.executor);
-    }
-
-    public void unban(UUID uuid) {
+    public <T extends HistoryRecord> void expireAll(Class<T> type, UUID uuid) {
         CompletableFuture.runAsync(() -> {
+            Table table = Table.fromClass(type);
+            if (table == null) return;
+
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("UPDATE `bans` SET active = false WHERE uuid = ?;");
+                PreparedStatement statement = connection.prepareStatement("UPDATE `" + table + "` SET active = false WHERE uuid = ?;");
                 statement.setString(1, uuid.toString());
 
                 statement.executeUpdate();
@@ -182,65 +147,28 @@ public class SQLHandler {
         }, this.executor);
     }
 
-    public void addBan(Ban ban) {
-        CompletableFuture.runAsync(() -> {
-            try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `bans` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);");
-                statement.setString(1, ban.uuid().toString());
-                statement.setString(2, ban.reason());
-                statement.setString(3, ban.executor().toString());
-                statement.setTimestamp(4, ban.date());
-                statement.setTimestamp(5, ban.expires());
-                statement.setBoolean(6, ban.active());
-
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }, this.executor);
-    }
-
-    public void expireBan(int id) {
-        CompletableFuture.runAsync(() -> {
-            try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("UPDATE `bans` SET active = false WHERE id = ?;");
-                statement.setInt(1, id);
-
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }, this.executor);
-    }
-
-    public void addKick(Kick kick) {
-        CompletableFuture.runAsync(() -> {
-            try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `kicks` (uuid, reason, executor, date) VALUES (?, ?, ?, ?);");
-                statement.setString(1, kick.uuid().toString());
-                statement.setString(2, kick.reason());
-                statement.setString(3, kick.executor().toString());
-                statement.setTimestamp(4, kick.date());
-
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }, this.executor);
-    }
-
-    public CompletableFuture<Integer> addMute(Mute mute) {
+    public <T extends HistoryRecord> CompletableFuture<Integer> add(T item) {
         return CompletableFuture.supplyAsync(() -> {
+            Table table = Table.fromClass(item.getClass());
+            if (table == null) return -1;
+
             try (Connection connection = this.getConnection()) {
                 PreparedStatement statement = connection.prepareStatement(
-                        "INSERT INTO `mutes` (uuid, reason, executor, date, expires, active) VALUES (?, ?, ?, ?, ?, ?);",
-                        Statement.RETURN_GENERATED_KEYS);
-                statement.setString(1, mute.uuid().toString());
-                statement.setString(2, mute.reason());
-                statement.setString(3, mute.executor().toString());
-                statement.setTimestamp(4, mute.date());
-                statement.setTimestamp(5, mute.expires());
-                statement.setBoolean(6, mute.active());
+                        String.format("INSERT INTO `" + table + "` (%s) VALUES (%s);",
+                                "uuid, reason, executor, date" + (table.isExpiring() ? ", expires, active" : ""),
+                                "?, ?, ?, ?" + (table.isExpiring() ? ", ?, ?" : "")
+                        ),
+                        Statement.RETURN_GENERATED_KEYS
+                );
+
+                statement.setString(1, item.uuid().toString());
+                statement.setString(2, item.reason());
+                statement.setString(3, item.executor().toString());
+                statement.setTimestamp(4, item.date());
+                if (item instanceof ExpiringRecord expiring) {
+                    statement.setTimestamp(5, expiring.expires());
+                    statement.setBoolean(6, expiring.active());
+                }
 
                 return statement.executeUpdate();
             } catch (SQLException e) {
@@ -251,10 +179,13 @@ public class SQLHandler {
         }, this.executor);
     }
 
-    public void expireMute(int id) {
+    public <T extends HistoryRecord> void expireSingle(Class<T> type, int id) {
         CompletableFuture.runAsync(() -> {
+            Table table = Table.fromClass(type);
+            if (table == null) return;
+
             try (Connection connection = this.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("UPDATE `mutes` SET active = false WHERE id = ?;");
+                PreparedStatement statement = connection.prepareStatement("UPDATE `" + table + "` SET active = false WHERE id = ?;");
                 statement.setInt(1, id);
 
                 statement.executeUpdate();

@@ -1,7 +1,7 @@
 package me.lorenzo0111.rocketbans.managers;
 
 import me.lorenzo0111.rocketbans.RocketBans;
-import me.lorenzo0111.rocketbans.data.Mute;
+import me.lorenzo0111.rocketbans.data.records.Mute;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -19,7 +19,7 @@ public class MuteManager implements Listener {
     }
 
     public void reload() {
-        plugin.getDatabase().getActiveMutes().thenAccept(mutes -> {
+        plugin.getDatabase().getActive(Mute.class).thenAccept(mutes -> {
             for (Mute mute : mutes) {
                 activeMutes.put(mute.uuid(), mute);
             }
@@ -40,6 +40,10 @@ public class MuteManager implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         if (!activeMutes.containsKey(event.getPlayer().getUniqueId())) return;
+
+        Mute mute = activeMutes.get(event.getPlayer().getUniqueId());
+        if (mute.expired() && mute.active())
+            mute.expire();
 
         event.setCancelled(true);
         event.getPlayer().sendMessage(plugin.getPrefixed("mute.deny"));

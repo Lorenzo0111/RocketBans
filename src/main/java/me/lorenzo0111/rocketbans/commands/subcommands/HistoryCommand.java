@@ -3,7 +3,7 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
-import me.lorenzo0111.rocketbans.data.Ban;
+import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -20,7 +20,7 @@ public class HistoryCommand extends SubCommand {
     @Override
     public void handle(CommandSender sender, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        plugin.getDatabase().getBans(target.getUniqueId(), false)
+        plugin.getDatabase().get(Ban.class, target.getUniqueId(), false)
                 .thenAccept(bans -> {
                     if (bans.isEmpty()) {
                         sender.sendMessage(plugin.getPrefixed("no-history"));
@@ -66,5 +66,10 @@ public class HistoryCommand extends SubCommand {
     @Override
     public String getUsage() {
         return "<player>";
+    }
+
+    @Override
+    public String getPermission() {
+        return "rocketbans.history";
     }
 }

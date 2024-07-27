@@ -4,7 +4,7 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.Ban;
+import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -50,7 +50,7 @@ public class BanCommand extends SubCommand {
                 true
         );
 
-        plugin.getDatabase().addBan(ban);
+        plugin.getDatabase().add(ban);
         target.ban(
                 ban.reason(),
                 ban.expires(),
@@ -88,5 +88,15 @@ public class BanCommand extends SubCommand {
     @Override
     public String getUsage() {
         return "<player> [time] [reason]";
+    }
+
+    @Override
+    public String getPermission() {
+        return "rocketbans.ban";
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"tempban"};
     }
 }

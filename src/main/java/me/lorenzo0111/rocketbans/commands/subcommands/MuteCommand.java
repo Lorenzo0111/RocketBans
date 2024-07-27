@@ -4,7 +4,7 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.Mute;
+import me.lorenzo0111.rocketbans.data.records.Mute;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -50,7 +50,7 @@ public class MuteCommand extends SubCommand {
                 true
         );
 
-        plugin.getDatabase().addMute(mute).thenAccept(id ->
+        plugin.getDatabase().add(mute).thenAccept(id ->
                 plugin.getMuteManager().addMute(mute.withId(id)));
 
         if (duration == -1)
@@ -84,5 +84,15 @@ public class MuteCommand extends SubCommand {
     @Override
     public String getUsage() {
         return "<player> [time] [reason]";
+    }
+
+    @Override
+    public String getPermission() {
+        return "rocketbans.mute";
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"tempmute"};
     }
 }

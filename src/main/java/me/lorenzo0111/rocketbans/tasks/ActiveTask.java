@@ -1,8 +1,8 @@
 package me.lorenzo0111.rocketbans.tasks;
 
 import me.lorenzo0111.rocketbans.RocketBans;
-import me.lorenzo0111.rocketbans.data.Ban;
-import me.lorenzo0111.rocketbans.data.Mute;
+import me.lorenzo0111.rocketbans.data.records.Ban;
+import me.lorenzo0111.rocketbans.data.records.Mute;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class ActiveTask extends BukkitRunnable {
@@ -16,13 +16,13 @@ public class ActiveTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        this.plugin.getDatabase().getActiveBans().thenAccept(bans -> {
+        this.plugin.getDatabase().getActive(Ban.class).thenAccept(bans -> {
             for (Ban ban : bans) {
                 if (ban.expired()) ban.expire();
             }
         });
 
-        this.plugin.getDatabase().getActiveMutes().thenAccept(bans -> {
+        this.plugin.getDatabase().getActive(Mute.class).thenAccept(bans -> {
             for (Mute mute : bans) {
                 if (mute.expired()) mute.expire();
             }

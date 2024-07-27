@@ -8,6 +8,8 @@ commands:
     aliases:
       - rb
       - ban
+      - tempban
       - unban
       - kick
       - mute
+      - tempmute
