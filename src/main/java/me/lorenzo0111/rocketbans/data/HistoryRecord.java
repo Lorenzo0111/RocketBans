@@ -11,4 +11,17 @@ public interface HistoryRecord {
     UUID executor();
     Timestamp date();
 
+    default HistoryRecord withId(int id) {
+        Table table = Table.fromClass(this.getClass());
+        assert table != null;
+
+        return table.create(
+                id,
+                this.uuid(),
+                this.reason(),
+                this.executor(),
+                this.date()
+        );
+    }
+
 }

@@ -86,15 +86,10 @@ public class SQLHandler {
                 statement.setString(1, uuid.toString());
 
                 ResultSet set = statement.executeQuery();
-                while (set.next()) {
-                    results.add(table.create(set.getInt("id"),
-                            UUID.fromString(set.getString("uuid")),
-                            set.getString("reason"),
-                            UUID.fromString(set.getString("executor")),
-                            set.getTimestamp("date"),
-                            table.isExpiring() ? set.getTimestamp("expires") : null,
-                            table.isExpiring() ? set.getBoolean("active") : null));
-                }
+                results.addAll(this.deserialize(type, set));
+
+                set.close();
+                statement.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -113,16 +108,10 @@ public class SQLHandler {
                 PreparedStatement statement = connection.prepareStatement("SELECT * FROM `" + table + "` WHERE active = true;");
                 ResultSet set = statement.executeQuery();
 
-                while (set.next()) {
-                    results.add(table.create(set.getInt("id"),
-                            UUID.fromString(set.getString("uuid")),
-                            set.getString("reason"),
-                            UUID.fromString(set.getString("executor")),
-                            set.getTimestamp("date"),
-                            table.isExpiring() ? set.getTimestamp("expires") : null,
-                            table.isExpiring() ? set.getBoolean("active") : null));
-                }
+                results.addAll(this.deserialize(type, set));
 
+                set.close();
+                statement.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -141,6 +130,7 @@ public class SQLHandler {
                 statement.setString(1, uuid.toString());
 
                 statement.executeUpdate();
+                statement.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -170,7 +160,19 @@ public class SQLHandler {
                     statement.setBoolean(6, expiring.active());
                 }
 
-                return statement.executeUpdate();
+                statement.executeUpdate();
+
+                ResultSet set = statement.getGeneratedKeys();
+                int res = -1;
+
+                if (set.next()) {
+                    res = set.getInt(1);
+                }
+
+                set.close();
+                statement.close();
+
+                return res;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -193,6 +195,24 @@ public class SQLHandler {
                 e.printStackTrace();
             }
         }, this.executor);
+    }
+
+    private <T extends HistoryRecord> List<T> deserialize(Class<T> type, ResultSet set) throws SQLException {
+        List<T> results = new ArrayList<>();
+        Table table = Table.fromClass(type);
+        if (table == null) return results;
+
+        while (set.next()) {
+            results.add(table.create(set.getInt("id"),
+                    UUID.fromString(set.getString("uuid")),
+                    set.getString("reason"),
+                    UUID.fromString(set.getString("executor")),
+                    set.getTimestamp("date"),
+                    table.isExpiring() ? set.getTimestamp("expires") : null,
+                    table.isExpiring() ? set.getBoolean("active") : null));
+        }
+
+        return results;
     }
 
     public void close() {

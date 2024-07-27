@@ -4,23 +4,34 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
-import me.lorenzo0111.rocketbans.data.records.Ban;
+import me.lorenzo0111.rocketbans.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.data.Table;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.function.BiConsumer;
 
-public class BanCommand extends SubCommand {
+public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand {
+    private final String name;
+    private final Class<T> type;
+    private final BiConsumer<T, Player> action;
 
-    public BanCommand(RocketBansCommand command) {
+    public ExpiringActionCommand(RocketBansCommand command,
+                                 String name, Class<T> type, @Nullable BiConsumer<T, Player> action) {
         super(command);
+        this.name = name;
+        this.type = type;
+        this.action = action;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void handle(CommandSender sender, String[] args) {
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) throw new UsageException();
@@ -40,7 +51,10 @@ public class BanCommand extends SubCommand {
 
         reason = new StringBuilder(StringUtils.color(reason.toString().trim()));
 
-        Ban ban = new Ban(
+        Table table = Table.fromClass(this.type);
+        if (table == null) return;
+
+        T item = table.create(
                 -1,
                 target.getUniqueId(),
                 reason.toString(),
@@ -50,34 +64,30 @@ public class BanCommand extends SubCommand {
                 true
         );
 
-        plugin.getDatabase().add(ban);
-        target.ban(
-                ban.reason(),
-                ban.expires(),
-                sender instanceof Player ? sender.getName() : "Console"
-        );
+        plugin.getDatabase().add(item)
+                .thenAccept(id -> action.accept((T) item.withId(id), target));
 
         if (duration == -1)
-            sender.sendMessage(plugin.getPrefixed("ban.permanent")
+            sender.sendMessage(plugin.getPrefixed(name + ".permanent")
                     .replace("%player%", target.getName())
-                    .replace("%reason%", ban.reason())
+                    .replace("%reason%", item.reason())
             );
         else
-            sender.sendMessage(plugin.getPrefixed("ban.temp")
+            sender.sendMessage(plugin.getPrefixed(name + ".temp")
                     .replace("%player%", target.getName())
-                    .replace("%reason%", ban.reason())
+                    .replace("%reason%", item.reason())
                     .replace("%time%", TimeUtils.formatTime(duration))
             );
     }
 
     @Override
     public String getName() {
-        return "ban";
+        return this.name;
     }
 
     @Override
     public String getDescription() {
-        return "Ban a player";
+        return StringUtils.capitalize(name) + " a player";
     }
 
     @Override
@@ -92,11 +102,11 @@ public class BanCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "rocketbans.ban";
+        return "rocketbans." + name;
     }
 
     @Override
     public String[] getAliases() {
-        return new String[]{"tempban"};
+        return new String[]{"temp" + name};
     }
 }

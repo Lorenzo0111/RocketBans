@@ -4,6 +4,8 @@ import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.exceptions.OnlyPlayersException;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
 import me.lorenzo0111.rocketbans.commands.subcommands.*;
+import me.lorenzo0111.rocketbans.data.records.Ban;
+import me.lorenzo0111.rocketbans.data.records.Mute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -21,11 +23,16 @@ public class RocketBansCommand implements TabExecutor {
 
         register(new HelpCommand(this));
         register(new ReloadCommand(this));
-        register(new BanCommand(this));
         register(new UnbanCommand(this));
         register(new HistoryCommand(this));
         register(new KickCommand(this));
-        register(new MuteCommand(this));
+        register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> player.ban(
+                ban.reason(),
+                ban.expires(),
+                ban.executor().toString()
+        )));
+        register(new ExpiringActionCommand<>(this, "mute", Mute.class, (mute, player) ->
+                plugin.getMuteManager().addMute(mute)));
     }
 
     @Override
@@ -101,7 +108,7 @@ public class RocketBansCommand implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length <= 1) {
             List<String> subCommands = new ArrayList<>();
 

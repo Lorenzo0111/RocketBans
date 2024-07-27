@@ -3,7 +3,12 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
+import me.lorenzo0111.rocketbans.data.ExpiringRecord;
+import me.lorenzo0111.rocketbans.data.HistoryRecord;
+import me.lorenzo0111.rocketbans.data.Table;
 import me.lorenzo0111.rocketbans.data.records.Ban;
+import me.lorenzo0111.rocketbans.data.records.Kick;
+import me.lorenzo0111.rocketbans.data.records.Mute;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -20,30 +25,39 @@ public class HistoryCommand extends SubCommand {
     @Override
     public void handle(CommandSender sender, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        plugin.getDatabase().get(Ban.class, target.getUniqueId(), false)
-                .thenAccept(bans -> {
-                    if (bans.isEmpty()) {
+        sendHistory(sender, target, Ban.class);
+        sendHistory(sender, target, Mute.class);
+        sendHistory(sender, target, Kick.class);
+    }
+
+    private <T extends HistoryRecord> void sendHistory(CommandSender sender, OfflinePlayer target, Class<T> type) {
+        plugin.getDatabase().get(type, target.getUniqueId(), false)
+                .thenAccept(items -> {
+                    if (items.isEmpty()) {
                         sender.sendMessage(plugin.getPrefixed("no-history"));
                         return;
                     }
 
-                    for (Ban ban : bans) {
-                        sender.sendMessage(
-                                plugin.getMessage("history")
-                                        .replace("%type%", "BAN")
-                                        .replace("%status%", ban.active() ? "Active" : "Expired")
-                                        .replace("%executor%",
-                                                ban.executor().equals(RocketBans.CONSOLE_UUID) ?
-                                                        "Console" :
-                                                        StringUtils.or(
-                                                                Bukkit.getOfflinePlayer(ban.executor()).getName(),
-                                                                "Unknown")
-                                        )
-                                        .replace("%reason%", ban.reason())
-                                        .replace("%date%", TimeUtils.formatDate(ban.date().getTime()))
-                                        .replace("%duration%", ban.expires() == null ? "Permanent" :
-                                                TimeUtils.formatTime(ban.expires().getTime() - ban.date().getTime()))
-                        );
+                    Table table = Table.fromClass(type);
+                    if (table == null) return;
+
+                    for (T item : items) {
+                        String message = plugin.getMessage("history")
+                                .replace("%type%", table.toString())
+                                .replace("%status%", !(item instanceof ExpiringRecord expiring) || expiring.active() ? "Active" : "Expired")
+                                .replace("%executor%",
+                                        item.executor().equals(RocketBans.CONSOLE_UUID) ?
+                                                "Console" :
+                                                StringUtils.or(
+                                                        Bukkit.getOfflinePlayer(item.executor()).getName(),
+                                                        "Unknown")
+                                )
+                                .replace("%reason%", item.reason())
+                                .replace("%date%", TimeUtils.formatDate(item.date().getTime()))
+                                .replace("%duration%", !(item instanceof ExpiringRecord expiring) || expiring.expires() == null ? "Permanent" :
+                                        TimeUtils.formatTime(expiring.expires().getTime() - item.date().getTime()));
+
+                        sender.sendMessage(message);
                     }
                 });
     }
