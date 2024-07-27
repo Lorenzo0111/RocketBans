@@ -6,6 +6,10 @@ mysql:
   database: "rocketbans"
   ssl: false
 
+warns:
+  max: 3
+  ban-command: "ban %player% 7d Max warnings reached."
+
 menus:
   items:
     previous:
@@ -56,5 +60,5 @@ messages:
     deny: "&cYou are currently muted. You cannot send messages."
   unban: "&c%player%&7 has been unbanned."
   kick: "&c%player%&7 has been kicked for &c%reason%&7."
-  no-history: "&c%player%&7 has no ban history."
+  no-history: "&c%player%&7 has no %type% history."
   history: "&f&l» &c%type%&7 - &c%executor%&7 - &c%reason%&7 - &c%date%&7 - &c%duration%&7 - &c%status%"

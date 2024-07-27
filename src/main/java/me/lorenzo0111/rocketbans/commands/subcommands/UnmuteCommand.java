@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
+import java.util.List;
+
 public class UnbanCommand extends SubCommand {
 
     public UnbanCommand(RocketBansCommand command) {
@@ -24,6 +26,11 @@ public class UnbanCommand extends SubCommand {
                 StringUtils.or(target.getName(), args[0])));
 
         Bukkit.getBannedPlayers().remove(target);
+    }
+
+    @Override
+    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+        return Bukkit.getBannedPlayers().stream().map(OfflinePlayer::getName).toList();
     }
 
     @Override

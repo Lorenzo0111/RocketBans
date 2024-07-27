@@ -76,7 +76,7 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
             sender.sendMessage(plugin.getPrefixed(name + ".temp")
                     .replace("%player%", target.getName())
                     .replace("%reason%", item.reason())
-                    .replace("%time%", TimeUtils.formatTime(duration))
+                    .replace("%duration%", TimeUtils.formatTime(duration))
             );
     }
 
@@ -97,7 +97,7 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
 
     @Override
     public String getUsage() {
-        return "<player> [time] [reason]";
+        return name + " <player> [time] [reason]";
     }
 
     @Override

@@ -3,6 +3,7 @@ package me.lorenzo0111.rocketbans.data;
 import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.data.records.Kick;
 import me.lorenzo0111.rocketbans.data.records.Mute;
+import me.lorenzo0111.rocketbans.data.records.Warn;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -10,7 +11,8 @@ import java.util.Arrays;
 public enum Table {
     BANS("bans", Ban.class),
     KICKS("kicks", Kick.class),
-    MUTES("mutes", Mute.class),;
+    MUTES("mutes", Mute.class),
+    WARNS("warns", Warn.class);
 
     private final String name;
     private final Class<? extends HistoryRecord> clazz;

@@ -47,7 +47,7 @@ public class SQLHandler {
         Connection connection = this.getConnection();
 
         Statement statement = connection.createStatement();
-        String query = "CREATE TABLE IF NOT EXISTS `%s` (" +
+        String expiringTable = "CREATE TABLE IF NOT EXISTS `%s` (" +
                 "`id` INT NOT NULL AUTO_INCREMENT, " +
                 "`uuid` VARCHAR(36) NOT NULL," +
                 "`reason` TEXT NOT NULL," +
@@ -58,8 +58,9 @@ public class SQLHandler {
                 "PRIMARY KEY (`id`)" +
                 ");";
 
-        statement.executeUpdate(String.format(query, Table.BANS));
-        statement.executeUpdate(String.format(query, Table.MUTES));
+        statement.executeUpdate(String.format(expiringTable, Table.BANS));
+        statement.executeUpdate(String.format(expiringTable, Table.MUTES));
+        statement.executeUpdate(String.format(expiringTable, Table.WARNS));
 
         statement.executeUpdate("CREATE TABLE IF NOT EXISTS `kicks` (" +
                 "`id` INT NOT NULL AUTO_INCREMENT, " +

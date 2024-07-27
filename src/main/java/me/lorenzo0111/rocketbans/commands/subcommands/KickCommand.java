@@ -69,7 +69,7 @@ public class KickCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "<player> [reason]";
+        return "kick <player> [reason]";
     }
 
     @Override

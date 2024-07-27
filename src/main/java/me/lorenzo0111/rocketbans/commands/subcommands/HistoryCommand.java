@@ -9,6 +9,7 @@ import me.lorenzo0111.rocketbans.data.Table;
 import me.lorenzo0111.rocketbans.data.records.Ban;
 import me.lorenzo0111.rocketbans.data.records.Kick;
 import me.lorenzo0111.rocketbans.data.records.Mute;
+import me.lorenzo0111.rocketbans.data.records.Warn;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
@@ -28,22 +29,24 @@ public class HistoryCommand extends SubCommand {
         sendHistory(sender, target, Ban.class);
         sendHistory(sender, target, Mute.class);
         sendHistory(sender, target, Kick.class);
+        sendHistory(sender, target, Warn.class);
     }
 
     private <T extends HistoryRecord> void sendHistory(CommandSender sender, OfflinePlayer target, Class<T> type) {
         plugin.getDatabase().get(type, target.getUniqueId(), false)
                 .thenAccept(items -> {
-                    if (items.isEmpty()) {
-                        sender.sendMessage(plugin.getPrefixed("no-history"));
-                        return;
-                    }
-
                     Table table = Table.fromClass(type);
                     if (table == null) return;
 
+                    if (items.isEmpty()) {
+                        sender.sendMessage(plugin.getPrefixed("no-history")
+                                .replace("%type%", table.toString()));
+                        return;
+                    }
+
                     for (T item : items) {
                         String message = plugin.getMessage("history")
-                                .replace("%type%", table.toString())
+                                .replace("%type%", table.toString().toUpperCase())
                                 .replace("%status%", !(item instanceof ExpiringRecord expiring) || expiring.active() ? "Active" : "Expired")
                                 .replace("%executor%",
                                         item.executor().equals(RocketBans.CONSOLE_UUID) ?
@@ -79,7 +82,7 @@ public class HistoryCommand extends SubCommand {
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return "history <player>";
     }
 
     @Override
