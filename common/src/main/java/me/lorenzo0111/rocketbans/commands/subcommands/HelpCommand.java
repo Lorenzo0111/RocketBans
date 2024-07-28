@@ -2,9 +2,8 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
-import org.bukkit.command.CommandSender;
-
-import static me.lorenzo0111.rocketbans.utils.StringUtils.color;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
+import me.lorenzo0111.rocketbans.utils.StringUtils;
 
 public class HelpCommand extends SubCommand {
 
@@ -13,10 +12,10 @@ public class HelpCommand extends SubCommand {
     }
 
     @Override
-    public void handle(CommandSender sender, String label, String[] args) {
+    public void handle(AbstractSender<?> sender, String label, String[] args) {
         String prefix = plugin.getMessage("prefix");
         sender.sendMessage(StringUtils.color(prefix + "&c&m-------------------------------"));
-        sender.sendMessage(StringUtils.color(prefix + "&c&lRocket&e&lBans &7v" + plugin.getDescription().getVersion()));
+        sender.sendMessage(StringUtils.color(prefix + "&c&lRocket&e&lBans &7v" + plugin.getVersion()));
         sender.sendMessage(prefix);
         sender.sendMessage(StringUtils.color(prefix + "&7Available commands:"));
 

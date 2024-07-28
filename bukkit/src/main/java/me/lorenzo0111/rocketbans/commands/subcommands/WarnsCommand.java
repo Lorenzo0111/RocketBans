@@ -5,10 +5,8 @@ import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.gui.menus.HistoryMenu;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,19 +17,18 @@ public class WarnsCommand extends SubCommand {
         super(command);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void handle(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) throw new UsageException();
+    public void handle(AbstractSender<?> sender, String[] args) {
+        if (!(sender instanceof AbstractPlayer<?> player)) throw new UsageException();
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
 
         plugin.getDatabase().get(Warn.class, target.getUniqueId(), true)
-                .thenAccept(warns -> new HistoryMenu(new ArrayList<>(warns)).open(player));
+                .thenAccept(warns -> new HistoryMenu(new ArrayList<>(warns)).open(player.getHandle()));
     }
 
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return playerNames();
     }
 

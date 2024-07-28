@@ -1,6 +1,6 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
-import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
@@ -10,30 +10,26 @@ import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
-import me.lorenzo0111.rocketbans.gui.menus.HistoryMenu;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoryCommand extends SubCommand {
+public abstract class HistoryCommand extends SubCommand {
 
     public HistoryCommand(RocketBansCommand command) {
         super(command);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void handle(CommandSender sender, String[] args) {
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+    public void handle(AbstractSender<?> sender, String[] args) {
+        AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
 
-        if (args.length == 2 && args[1].equalsIgnoreCase("-m") && sender instanceof Player player) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        if (supportsMenu() && args.length == 2 && args[1].equalsIgnoreCase("-m") && sender instanceof AbstractPlayer<?> player) {
+            plugin.getPlatform().async(() -> {
                 List<Ban> bans = plugin.getDatabase().get(Ban.class, target.getUniqueId(), false).join();
                 List<Mute> mutes = plugin.getDatabase().get(Mute.class, target.getUniqueId(), false).join();
                 List<Kick> kicks = plugin.getDatabase().get(Kick.class, target.getUniqueId(), false).join();
@@ -45,7 +41,7 @@ public class HistoryCommand extends SubCommand {
                 merged.addAll(kicks);
                 merged.addAll(warns);
 
-                new HistoryMenu(merged).open(player);
+                openMenu(player, merged);
             });
             return;
         }
@@ -56,7 +52,7 @@ public class HistoryCommand extends SubCommand {
         sendHistory(sender, target, Warn.class);
     }
 
-    private <T extends HistoryRecord> void sendHistory(CommandSender sender, OfflinePlayer target, Class<T> type) {
+    private <T extends HistoryRecord> void sendHistory(AbstractSender<?> sender, AbstractPlayer<?> target, Class<T> type) {
         plugin.getDatabase().get(type, target.getUniqueId(), false)
                 .thenAccept(items -> {
                     Table table = Table.fromClass(type);
@@ -74,10 +70,10 @@ public class HistoryCommand extends SubCommand {
                                 .replace("%type%", table.toString().toUpperCase())
                                 .replace("%status%", !(item instanceof ExpiringRecord expiring) || expiring.active() ? "Active" : "Expired")
                                 .replace("%executor%",
-                                        item.executor().equals(RocketBans.CONSOLE_UUID) ?
+                                        item.executor().equals(RocketBansAPI.CONSOLE_UUID) ?
                                                 "Console" :
                                                 StringUtils.or(
-                                                        Bukkit.getOfflinePlayer(item.executor()).getName(),
+                                                        plugin.getPlatform().getPlayer(item.executor()).getName(),
                                                         "Unknown")
                                 )
                                 .replace("%reason%", item.reason())
@@ -90,8 +86,11 @@ public class HistoryCommand extends SubCommand {
                 });
     }
 
+    public abstract boolean supportsMenu();
+    public abstract void openMenu(AbstractPlayer<?> player, List<HistoryRecord> records);
+
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return playerNames();
     }
 
@@ -119,4 +118,5 @@ public class HistoryCommand extends SubCommand {
     public String getPermission() {
         return "rocketbans.history";
     }
+
 }

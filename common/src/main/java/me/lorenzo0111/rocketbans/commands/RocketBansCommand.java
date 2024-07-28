@@ -7,13 +7,13 @@ import me.lorenzo0111.rocketbans.commands.subcommands.*;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
-import me.lorenzo0111.rocketbans.entity.AbstractSender;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RocketBansCommand {
+public abstract class RocketBansCommand {
     private final RocketBansPlugin plugin;
     private final List<SubCommand> subCommands = new ArrayList<>();
 
@@ -24,27 +24,26 @@ public class RocketBansCommand {
         register(new ReloadCommand(this));
         register(new UnbanCommand(this));
         register(new UnmuteCommand(this));
-        register(new HistoryCommand(this));
+// todo       register(new HistoryCommand(this));
         register(new DeleteCommand(this));
-        register(new WarnsCommand(this));
+// todo        register(new WarnsCommand(this));
         register(new KickCommand(this));
-        register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> player.ban(
+        register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> plugin.getPlatform().ban(
+                player,
                 ban.reason(),
                 ban.expires(),
-                ban.executor().toString(),
-                true
+                ban.executor()
         )));
         register(new ExpiringActionCommand<>(this, "mute", Mute.class, (mute, player) ->
                 plugin.getMuteManager().addMute(mute)));
         register(new ExpiringActionCommand<>(this, "warn", Warn.class, (warn, player) -> {
-            int maxWarns = plugin.getConfig().getInt("warns.max");
+            int maxWarns = plugin.getConfig().node("warns.max").getInt();
             if (maxWarns == -1) return;
 
             plugin.getDatabase().get(Warn.class, player.getUniqueId(), true).thenAccept(warns -> {
                if (warns.size() >= maxWarns) {
-                   Bukkit.dispatchCommand(
-                           Bukkit.getConsoleSender(),
-                           plugin.getConfig().getString("warns.ban-command", "")
+                   plugin.getPlatform().dispatchCommand(
+                           plugin.getConfig().node("warns", "ban-command").getString("")
                                    .replace("%player%", player.getName())
                    );
                }
@@ -52,7 +51,7 @@ public class RocketBansCommand {
         }));
     }
 
-    public void handleCommand(@NotNull AbstractSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    protected void handleCommand(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
         SubCommand subCommand = getSubCommand(label);
         if (subCommand instanceof NotFoundCommand)
             subCommand = null;
@@ -74,7 +73,43 @@ public class RocketBansCommand {
         this.runSubCommand(sender, subCommand, label, newArgs);
     }
 
-    private void runSubCommand(AbstractSender sender, SubCommand command, String label, String[] args) {
+    protected List<String> tabComplete(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
+        SubCommand cmd = getSubCommand(label);
+        if (cmd instanceof NotFoundCommand)
+            cmd = null;
+
+        if (cmd != null) {
+            if (cmd.getPermission() != null && !sender.hasPermission(cmd.getPermission())) {
+                return new ArrayList<>();
+            }
+
+            return cmd.handleTabCompletion(sender, args);
+        }
+
+        if (args.length <= 1) {
+            List<String> subCommands = new ArrayList<>();
+
+            for (SubCommand subCommand : this.subCommands) {
+                if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
+                    continue;
+                }
+
+                if (args.length == 0 || subCommand.getName().startsWith(args[0])) {
+                    subCommands.add(subCommand.getName());
+                }
+            }
+
+            return subCommands;
+        }
+
+        cmd = getSubCommand(args[0]);
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+
+        return cmd.handleTabCompletion(sender, newArgs);
+    }
+
+    private void runSubCommand(AbstractSender<?> sender, SubCommand command, String label, String[] args) {
         if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
             sender.sendMessage(plugin.getPrefixed("no-permission"));
             return;
@@ -122,41 +157,5 @@ public class RocketBansCommand {
 
     public List<SubCommand> getSubCommands() {
         return subCommands;
-    }
-
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        SubCommand cmd = getSubCommand(label);
-        if (cmd instanceof NotFoundCommand)
-            cmd = null;
-
-        if (cmd != null) {
-            if (cmd.getPermission() != null && !sender.hasPermission(cmd.getPermission())) {
-                return new ArrayList<>();
-            }
-
-            return cmd.handleTabCompletion(sender, args);
-        }
-
-        if (args.length <= 1) {
-            List<String> subCommands = new ArrayList<>();
-
-            for (SubCommand subCommand : this.subCommands) {
-                if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
-                    continue;
-                }
-
-                if (args.length == 0 || subCommand.getName().startsWith(args[0])) {
-                    subCommands.add(subCommand.getName());
-                }
-            }
-
-            return subCommands;
-        }
-
-        cmd = getSubCommand(args[0]);
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-
-        return cmd.handleTabCompletion(sender, newArgs);
     }
 }

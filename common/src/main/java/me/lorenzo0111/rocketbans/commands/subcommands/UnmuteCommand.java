@@ -3,11 +3,9 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,10 +16,9 @@ public class UnmuteCommand extends SubCommand {
         super(command);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void handle(CommandSender sender, String[] args) {
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+    public void handle(AbstractSender<?> sender, String[] args) {
+        AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
         plugin.getDatabase().expireAll(Mute.class, target.getUniqueId());
 
         sender.sendMessage(plugin.getPrefixed("unmute").replace("%player%",
@@ -31,12 +28,12 @@ public class UnmuteCommand extends SubCommand {
     }
 
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return plugin.getMuteManager().getMutes()
                 .keySet().stream()
-                .map(Bukkit::getPlayer)
+                .map(uuid -> plugin.getPlatform().getPlayer(uuid))
                 .filter(Objects::nonNull)
-                .map(Player::getName)
+                .map(AbstractPlayer::getName)
                 .toList();
     }
 

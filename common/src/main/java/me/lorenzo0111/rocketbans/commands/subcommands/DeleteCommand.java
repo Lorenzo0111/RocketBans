@@ -3,10 +3,7 @@ package me.lorenzo0111.rocketbans.commands.subcommands;
 import me.lorenzo0111.rocketbans.api.data.Table;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +15,7 @@ public class DeleteCommand extends SubCommand {
     }
 
     @Override
-    public void handle(CommandSender sender, String[] args) {
+    public void handle(AbstractSender<?> sender, String[] args) {
         Table table;
         int id;
 
@@ -41,7 +38,7 @@ public class DeleteCommand extends SubCommand {
     }
 
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return Arrays.stream(Table.values())
                 .map(Table::getName)
                 .map(String::toLowerCase)

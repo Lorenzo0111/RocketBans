@@ -1,16 +1,14 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
-import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
 import me.lorenzo0111.rocketbans.api.data.Table;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
@@ -21,10 +19,10 @@ import java.util.function.BiConsumer;
 public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand {
     private final String name;
     private final Class<T> type;
-    private final BiConsumer<T, Player> action;
+    private final BiConsumer<T, AbstractPlayer<?>> action;
 
     public ExpiringActionCommand(RocketBansCommand command,
-                                 String name, Class<T> type, @Nullable BiConsumer<T, Player> action) {
+                                 String name, Class<T> type, @Nullable BiConsumer<T, AbstractPlayer<?>> action) {
         super(command);
         this.name = name;
         this.type = type;
@@ -33,9 +31,9 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
 
     @Override
     @SuppressWarnings("unchecked")
-    public void handle(CommandSender sender, String[] args) {
-        Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) throw new UsageException();
+    public void handle(AbstractSender<?> sender, String[] args) {
+        AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
+        if (target == null || !target.isOnline()) throw new UsageException();
 
         long duration = -1;
         StringBuilder reason = new StringBuilder("N/A");
@@ -61,7 +59,7 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
                 -1,
                 target.getUniqueId(),
                 reason.toString(),
-                sender instanceof Player ? ((Player) sender).getUniqueId() : RocketBans.CONSOLE_UUID,
+                sender.getUniqueId(),
                 new Timestamp(new Date().getTime()),
                 duration == -1 ? null : new Timestamp(new Date().getTime() + duration),
                 true
@@ -85,12 +83,12 @@ public class ExpiringActionCommand<T extends ExpiringRecord> extends SubCommand 
         if (args[args.length - 1].equalsIgnoreCase("-s")) {
             sender.sendMessage(message);
         } else {
-            Bukkit.broadcastMessage(message);
+            plugin.getPlatform().broadcast(message);
         }
     }
 
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return playerNames();
     }
 

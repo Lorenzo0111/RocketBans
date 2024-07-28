@@ -35,6 +35,7 @@ public class MuteManager implements IMuteManager {
         activeMutes.remove(uuid);
     }
 
+    @Override
     public Map<UUID, Mute> getMutes() {
         return activeMutes;
     }

@@ -1,15 +1,14 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
-import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -22,9 +21,9 @@ public class KickCommand extends SubCommand {
     }
 
     @Override
-    public void handle(CommandSender sender, String[] args) {
-        Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) throw new UsageException();
+    public void handle(AbstractSender<?> sender, String[] args) {
+        AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
+        if (target == null || !target.isOnline()) throw new UsageException();
 
         StringBuilder reason = new StringBuilder("N/A");
 
@@ -42,18 +41,18 @@ public class KickCommand extends SubCommand {
                 -1,
                 target.getUniqueId(),
                 reason.toString(),
-                sender instanceof Player ? ((Player) sender).getUniqueId() : RocketBans.CONSOLE_UUID,
+                sender.getUniqueId(),
                 new Timestamp(new Date().getTime())
         );
 
         plugin.getDatabase().add(kick);
-        target.kickPlayer(String.join("\n",
+        plugin.getPlatform().kick(target, String.join("\n",
                 plugin.getMessages("screens.kick")
                         .stream()
                         .map(s -> s.replace("%id%", String.valueOf(kick.id()))
                                 .replace("%executor%", StringUtils.or(
-                                        kick.executor().equals(RocketBans.CONSOLE_UUID) ? "Console" :
-                                                Bukkit.getOfflinePlayer(kick.executor()).getName(), "Unknown"))
+                                        kick.executor().equals(RocketBansAPI.CONSOLE_UUID) ? "Console" :
+                                                plugin.getPlatform().getPlayer(kick.executor()).getName(), "Unknown"))
                                 .replace("%reason%", kick.reason())
                                 .replace("%date%", TimeUtils.formatDate(kick.date().getTime()))
                         )
@@ -67,12 +66,12 @@ public class KickCommand extends SubCommand {
         if (args[args.length - 1].equalsIgnoreCase("-s")) {
             sender.sendMessage(message);
         } else {
-            Bukkit.broadcastMessage(message);
+            plugin.getPlatform().broadcast(message);
         }
     }
 
     @Override
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return playerNames();
     }
 

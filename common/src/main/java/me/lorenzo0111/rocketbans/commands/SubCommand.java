@@ -1,8 +1,8 @@
 package me.lorenzo0111.rocketbans.commands;
 
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
-import me.lorenzo0111.rocketbans.entity.AbstractPlayer;
-import me.lorenzo0111.rocketbans.entity.AbstractSender;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,20 +16,20 @@ public abstract class SubCommand {
         this.plugin = command.getPlugin();
     }
 
-    public void handle(AbstractSender sender, String[] args) {
+    public void handle(AbstractSender<?> sender, String[] args) {
         throw new UnsupportedOperationException("This command is not implemented yet.");
     }
 
-    public void handle(AbstractSender sender, String label, String[] args) {
+    public void handle(AbstractSender<?> sender, String label, String[] args) {
         this.handle(sender, args);
     }
 
-    public List<String> handleTabCompletion(AbstractSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender<?> sender, String[] args) {
         return new ArrayList<>();
     }
 
     protected List<String> playerNames() {
-        return plugin.getPlayerList().stream().map(AbstractPlayer::getName).toList();
+        return plugin.getPlatform().getPlayerList().stream().map(AbstractPlayer::getName).toList();
     }
 
     public abstract String getName();
