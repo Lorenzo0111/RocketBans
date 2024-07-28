@@ -119,6 +119,13 @@ public class BukkitPlatform implements PlatformAdapter {
                 Objects.requireNonNullElseGet(player, () -> Bukkit.getOfflinePlayer(uuid)));
     }
 
+    @Override
+    public void sendSyncPacket(String data) {
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getOnlinePlayers().stream()
+                .findFirst()
+                .ifPresent(player -> player.sendPluginMessage(plugin, "rocketbans:sync", data.getBytes())));
+    }
+
     private OfflinePlayer adapt(@NotNull AbstractPlayer<?> player) {
         return (OfflinePlayer) player.getHandle();
     }

@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.velocity.platform;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
@@ -70,7 +71,7 @@ public class VelocityPlatform implements PlatformAdapter {
 
     @Override
     public void ban(AbstractPlayer<?> player, String reason, Date duration, UUID executor) {
-        plugin.getDatabase().add(new Ban(
+        Ban item = new Ban(
                 -1,
                 player.getUniqueId(),
                 reason,
@@ -78,7 +79,9 @@ public class VelocityPlatform implements PlatformAdapter {
                 new Timestamp(new Date().getTime()),
                 new Timestamp(duration.getTime()),
                 true
-        ));
+        );
+        plugin.getBanManager().addBan(item);
+        plugin.getDatabase().add(item);
     }
 
     @Override
@@ -111,6 +114,12 @@ public class VelocityPlatform implements PlatformAdapter {
     public AbstractPlayer<?> getPlayer(UUID uuid) {
         Player player = plugin.getServer().getPlayer(uuid).orElse(null);
         return VelocityAdapter.player(player);
+    }
+
+    @Override
+    public void sendSyncPacket(String data) {
+        for (RegisteredServer server : plugin.getServer().getAllServers())
+            server.sendPluginMessage(RocketBans.IDENTIFIER, data.getBytes());
     }
 
     private Player adapt(@NotNull AbstractPlayer<?> player) {

@@ -8,8 +8,9 @@ import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.bungee.commands.BungeeCommand;
+import me.lorenzo0111.rocketbans.bungee.listeners.ChannelListener;
 import me.lorenzo0111.rocketbans.bungee.listeners.PlayerListener;
-import me.lorenzo0111.rocketbans.bungee.managers.BanManager;
+import me.lorenzo0111.rocketbans.managers.BanManager;
 import me.lorenzo0111.rocketbans.bungee.platform.BungeePlatform;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
@@ -77,10 +78,13 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
 
         // ******** Listeners ********
         this.getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
+        this.getProxy().getPluginManager().registerListener(this, new ChannelListener(this));
 
         // ******** Tasks ********
         this.getProxy().getScheduler().schedule(this, new ActiveTask(this), 0, 1, TimeUnit.HOURS);
         this.getProxy().getScheduler().schedule(this, banManager::reload, 0, 1, TimeUnit.HOURS);
+
+        this.getProxy().registerChannel("rocketbans:sync");
     }
 
 

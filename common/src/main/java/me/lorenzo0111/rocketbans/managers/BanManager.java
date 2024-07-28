@@ -1,4 +1,4 @@
-package me.lorenzo0111.rocketbans.bungee.managers;
+package me.lorenzo0111.rocketbans.managers;
 
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
@@ -27,10 +27,12 @@ public class BanManager {
 
     public void addBan(Ban ban) {
         activeBans.put(ban.uuid(), ban);
+        plugin.getPlatform().sendSyncPacket("+bans");
     }
 
     public void removeBan(UUID uuid) {
         activeBans.remove(uuid);
+        plugin.getPlatform().sendSyncPacket("-bans");
     }
 
     public boolean isBanned(UUID uuid) {

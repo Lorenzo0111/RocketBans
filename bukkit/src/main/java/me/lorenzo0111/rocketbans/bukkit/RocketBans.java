@@ -1,5 +1,6 @@
 package me.lorenzo0111.rocketbans.bukkit;
 
+import me.lorenzo0111.rocketbans.bukkit.listeners.ChannelListener;
 import me.lorenzo0111.rocketbans.bukkit.listeners.PlayerListener;
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
 import me.lorenzo0111.rocketbans.api.RocketBansProvider;
@@ -69,6 +70,9 @@ public final class RocketBans extends JavaPlugin implements RocketBansPlugin {
 
         // ******** Tasks ********
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ActiveTask(this), 0, 60 * 60 * 20L);
+
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, "rocketbans:sync", new ChannelListener(this));
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "rocketbans:sync");
     }
 
 

@@ -30,11 +30,13 @@ public class MuteManager implements IMuteManager {
     @Override
     public void addMute(Mute mute) {
         activeMutes.put(mute.uuid(), mute);
+        plugin.getPlatform().sendSyncPacket("+mutes");
     }
 
     @Override
     public void removeMutes(UUID uuid) {
         activeMutes.remove(uuid);
+        plugin.getPlatform().sendSyncPacket("-mutes");
     }
 
     @Override

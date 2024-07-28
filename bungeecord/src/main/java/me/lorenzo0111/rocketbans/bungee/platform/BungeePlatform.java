@@ -7,6 +7,7 @@ import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +65,7 @@ public class BungeePlatform implements PlatformAdapter {
 
     @Override
     public void ban(AbstractPlayer<?> player, String reason, Date duration, UUID executor) {
-        plugin.getDatabase().add(new Ban(
+        Ban item = new Ban(
                 -1,
                 player.getUniqueId(),
                 reason,
@@ -72,7 +73,9 @@ public class BungeePlatform implements PlatformAdapter {
                 new Timestamp(new Date().getTime()),
                 new Timestamp(duration.getTime()),
                 true
-        ));
+        );
+        plugin.getBanManager().addBan(item);
+        plugin.getDatabase().add(item);
     }
 
     @Override
@@ -105,6 +108,12 @@ public class BungeePlatform implements PlatformAdapter {
     public AbstractPlayer<?> getPlayer(UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
         return BungeeAdapter.player(player);
+    }
+
+    @Override
+    public void sendSyncPacket(String data) {
+        for (ServerInfo server : plugin.getProxy().getServers().values())
+            server.sendData("rocketbans:sync", data.getBytes());
     }
 
     private ProxiedPlayer adapt(@NotNull AbstractPlayer<?> player) {

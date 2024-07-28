@@ -24,4 +24,6 @@ public interface PlatformAdapter {
     List<AbstractPlayer<?>> getPlayerList();
     AbstractPlayer<?> getPlayer(String name);
     AbstractPlayer<?> getPlayer(UUID uuid);
+
+    void sendSyncPacket(String data);
 }

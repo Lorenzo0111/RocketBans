@@ -8,6 +8,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
 import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
@@ -21,8 +22,9 @@ import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.velocity.commands.VelocityCommand;
+import me.lorenzo0111.rocketbans.velocity.listeners.ChannelListener;
 import me.lorenzo0111.rocketbans.velocity.listeners.PlayerListener;
-import me.lorenzo0111.rocketbans.velocity.managers.BanManager;
+import me.lorenzo0111.rocketbans.managers.BanManager;
 import me.lorenzo0111.rocketbans.velocity.platform.VelocityPlatform;
 import net.kyori.adventure.text.Component;
 import org.bstats.velocity.Metrics;
@@ -47,6 +49,8 @@ import java.util.concurrent.TimeUnit;
         version = "@version@",
         authors = {"Lorenzo0111"})
 public final class RocketBans implements RocketBansPlugin {
+    public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("rocketbans:sync");
+
     private final Logger logger;
     private final Path path;
     private final ProxyServer server;
@@ -103,6 +107,7 @@ public final class RocketBans implements RocketBansPlugin {
 
         // ******** Listeners ********
         server.getEventManager().register(this, new PlayerListener(this));
+        server.getEventManager().register(this, new ChannelListener(this));
 
         // ******** Tasks ********
         server.getScheduler().buildTask(this, new ActiveTask(this))
@@ -111,6 +116,8 @@ public final class RocketBans implements RocketBansPlugin {
         server.getScheduler().buildTask(this, banManager::reload)
                 .repeat(1, TimeUnit.HOURS)
                 .schedule();
+
+        server.getChannelRegistrar().register(IDENTIFIER);
     }
 
     public void log(String message) {
@@ -295,5 +302,4 @@ public final class RocketBans implements RocketBansPlugin {
             }
         }
     }
-
 }
