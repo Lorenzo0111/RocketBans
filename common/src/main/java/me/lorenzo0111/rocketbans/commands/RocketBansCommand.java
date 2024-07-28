@@ -49,7 +49,7 @@ public abstract class RocketBansCommand {
         }));
     }
 
-    protected void handleCommand(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
+    public void handleCommand(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
         SubCommand subCommand = getSubCommand(label);
         if (subCommand instanceof NotFoundCommand)
             subCommand = null;
@@ -71,7 +71,7 @@ public abstract class RocketBansCommand {
         this.runSubCommand(sender, subCommand, label, newArgs);
     }
 
-    protected List<String> handleTab(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
+    public List<String> handleTab(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
         SubCommand cmd = getSubCommand(label);
         if (cmd instanceof NotFoundCommand)
             cmd = null;

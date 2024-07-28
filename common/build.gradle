@@ -2,7 +2,3 @@ dependencies {
     implementation project(':api')
     implementation 'com.zaxxer:HikariCP:5.1.0'
 }
-
-shadowJar {
-    relocate("com.zaxxer.hikari", "${libsBase}.hikari")
-}

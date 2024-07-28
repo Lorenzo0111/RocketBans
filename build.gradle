@@ -33,7 +33,11 @@ subprojects {
     }
 
     shadowJar {
-        relocate("org.spongepowered.configurate", "${libsBase}configurate")
+        relocate("org.spongepowered.configurate", "${libsBase}.configurate")
+        relocate("org.bstats", "${libsBase}.bstats")
+        relocate("com.zaxxer.hikari", "${libsBase}.hikari")
+        relocate("xyz.xenondevs.invui", "${libsBase}.invui")
+        relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.inventoryaccess")
 
         archiveFileName = "RocketBans-${project.name}-${project.version}.jar"
     }
@@ -45,4 +49,6 @@ subprojects {
             filter ReplaceTokens, tokens: [version: version]
         }
     }
+
+    tasks.build.dependsOn tasks.shadowJar
 }

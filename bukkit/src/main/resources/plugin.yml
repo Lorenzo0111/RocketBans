@@ -1,6 +1,6 @@
 name: RocketBans
-version: '${version}'
-main: me.lorenzo0111.rocketbans.RocketBans
+version: @version@
+main: me.lorenzo0111.rocketbans.bukkit.RocketBans
 api-version: '1.13'
 authors: [Lorenzo0111]
 commands:
