@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.gui.items;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.RocketBansProvider;
 import org.bukkit.Material;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.AbstractItemBuilder;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class ConfiguredItem extends AbstractItem {
-    protected static final RocketBans plugin = RocketBans.getInstance();
+    protected final RocketBans plugin = (RocketBans) RocketBansProvider.get();
     private final String id;
 
     public ConfiguredItem(String id) {

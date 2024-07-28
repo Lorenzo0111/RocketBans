@@ -7,6 +7,7 @@ import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.gui.menus.HistoryMenu;
 import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
 import me.lorenzo0111.rocketbans.platform.entity.AbstractSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class WarnsCommand extends SubCommand {
         AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
 
         plugin.getDatabase().get(Warn.class, target.getUniqueId(), true)
-                .thenAccept(warns -> new HistoryMenu(new ArrayList<>(warns)).open(player.getHandle()));
+                .thenAccept(warns -> new HistoryMenu(new ArrayList<>(warns)).open((Player) player.getHandle()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.gui.items;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.RocketBansProvider;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -24,7 +25,7 @@ public class NavigationItem extends ControlItem<PagedGui<?>> {
 
     @Override
     public ItemProvider getItemProvider(PagedGui<?> gui) {
-        RocketBans plugin = RocketBans.getInstance();
+        RocketBans plugin = (RocketBans) RocketBansProvider.get();
         AbstractItemBuilder<?> builder;
 
         Material type = Material.getMaterial(plugin.getConfig().getString("menus.items." + (forward ? "next" : "previous") + ".type", "BARRIER"));

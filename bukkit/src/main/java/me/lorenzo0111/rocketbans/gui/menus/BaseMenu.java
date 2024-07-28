@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.gui.menus;
 
 import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.RocketBansProvider;
 import me.lorenzo0111.rocketbans.gui.items.NavigationItem;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class BaseMenu {
-    protected final RocketBans plugin = RocketBans.getInstance();
+    protected final RocketBans plugin = (RocketBans) RocketBansProvider.get();
     private final String id;
     private final Map<Character, Item> items = new HashMap<>();
     private final List<Item> content = new ArrayList<>();

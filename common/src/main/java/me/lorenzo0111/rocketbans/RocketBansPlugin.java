@@ -10,7 +10,7 @@ import java.util.List;
 public interface RocketBansPlugin extends RocketBansAPI {
 
     SQLHandler getDatabase();
-    ConfigurationNode getConfig();
+    ConfigurationNode getConfiguration();
     PlatformAdapter getPlatform();
 
     String getMessage(String path);

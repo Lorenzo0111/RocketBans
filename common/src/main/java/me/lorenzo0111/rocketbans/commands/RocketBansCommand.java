@@ -24,9 +24,7 @@ public abstract class RocketBansCommand {
         register(new ReloadCommand(this));
         register(new UnbanCommand(this));
         register(new UnmuteCommand(this));
-// todo       register(new HistoryCommand(this));
         register(new DeleteCommand(this));
-// todo        register(new WarnsCommand(this));
         register(new KickCommand(this));
         register(new ExpiringActionCommand<>(this, "ban", Ban.class, (ban, player) -> plugin.getPlatform().ban(
                 player,
@@ -37,13 +35,13 @@ public abstract class RocketBansCommand {
         register(new ExpiringActionCommand<>(this, "mute", Mute.class, (mute, player) ->
                 plugin.getMuteManager().addMute(mute)));
         register(new ExpiringActionCommand<>(this, "warn", Warn.class, (warn, player) -> {
-            int maxWarns = plugin.getConfig().node("warns.max").getInt();
+            int maxWarns = plugin.getConfiguration().node("warns", "max").getInt();
             if (maxWarns == -1) return;
 
             plugin.getDatabase().get(Warn.class, player.getUniqueId(), true).thenAccept(warns -> {
                if (warns.size() >= maxWarns) {
                    plugin.getPlatform().dispatchCommand(
-                           plugin.getConfig().node("warns", "ban-command").getString("")
+                           plugin.getConfiguration().node("warns", "ban-command").getString("")
                                    .replace("%player%", player.getName())
                    );
                }
@@ -73,7 +71,7 @@ public abstract class RocketBansCommand {
         this.runSubCommand(sender, subCommand, label, newArgs);
     }
 
-    protected List<String> tabComplete(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
+    protected List<String> handleTab(@NotNull AbstractSender<?> sender, @NotNull String label, String[] args) {
         SubCommand cmd = getSubCommand(label);
         if (cmd instanceof NotFoundCommand)
             cmd = null;

@@ -23,11 +23,11 @@ public class SQLHandler {
 
     public SQLHandler(RocketBansPlugin plugin) {
         this.plugin = plugin;
-        this.executor = plugin::async;
+        this.executor = plugin.getPlatform()::async;
     }
 
-    public void init(ConfigurationNode config) throws SQLException {
-        ConfigurationNode cs = config.node("mysql");
+    public void init() throws SQLException {
+        ConfigurationNode cs = plugin.getConfiguration().node("mysql");
         Objects.requireNonNull(cs, "Unable to find the following key: mysql");
         HikariConfig hikari = new HikariConfig();
 
@@ -94,7 +94,7 @@ public class SQLHandler {
                 set.close();
                 statement.close();
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
 
             return results;
@@ -116,7 +116,7 @@ public class SQLHandler {
                 set.close();
                 statement.close();
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
 
             return results;
@@ -135,7 +135,7 @@ public class SQLHandler {
                 statement.executeUpdate();
                 statement.close();
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
         }, this.executor);
     }
@@ -177,7 +177,7 @@ public class SQLHandler {
 
                 return res;
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
 
             return -1;
@@ -195,7 +195,7 @@ public class SQLHandler {
 
                 statement.executeUpdate();
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
         }, this.executor);
     }
@@ -211,7 +211,7 @@ public class SQLHandler {
 
                 statement.executeUpdate();
             } catch (SQLException e) {
-                plugin.logException(e);
+                plugin.getPlatform().logException(e);
             }
         }, this.executor);
     }

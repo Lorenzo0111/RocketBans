@@ -18,9 +18,9 @@ import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class HistoryCommand extends SubCommand {
+public abstract class AbstractHistoryCommand extends SubCommand {
 
-    public HistoryCommand(RocketBansCommand command) {
+    public AbstractHistoryCommand(RocketBansCommand command) {
         super(command);
     }
 
@@ -28,7 +28,8 @@ public abstract class HistoryCommand extends SubCommand {
     public void handle(AbstractSender<?> sender, String[] args) {
         AbstractPlayer<?> target = plugin.getPlatform().getPlayer(args[0]);
 
-        if (supportsMenu() && args.length == 2 && args[1].equalsIgnoreCase("-m") && sender instanceof AbstractPlayer<?> player) {
+        if (supportsMenu() && args.length == 2 && args[1].equalsIgnoreCase("-m")
+                && sender instanceof AbstractPlayer<?> player && player.isOnline()) {
             plugin.getPlatform().async(() -> {
                 List<Ban> bans = plugin.getDatabase().get(Ban.class, target.getUniqueId(), false).join();
                 List<Mute> mutes = plugin.getDatabase().get(Mute.class, target.getUniqueId(), false).join();

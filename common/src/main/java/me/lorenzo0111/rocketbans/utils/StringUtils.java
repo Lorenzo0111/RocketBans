@@ -15,11 +15,11 @@ public final class StringUtils {
 
         while (matcher.find()) {
             String color = message.substring(matcher.start(), matcher.end());
-            message = message.replace(color, RocketBansProvider.get().nativeColorOf(color.replace("&", "")));
+            message = message.replace(color, RocketBansProvider.get().getPlatform().nativeColorOf(color.replace("&", "")));
             matcher = PATTERN.matcher(message);
         }
 
-        return RocketBansProvider.get().nativeColor(message);
+        return RocketBansProvider.get().getPlatform().nativeColor(message);
     }
 
     public static List<String> color(List<String> messages) {

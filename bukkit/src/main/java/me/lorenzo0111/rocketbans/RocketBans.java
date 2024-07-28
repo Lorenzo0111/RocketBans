@@ -1,15 +1,16 @@
 package me.lorenzo0111.rocketbans;
 
-import me.lorenzo0111.rocketbans.api.RocketBansAPI;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Kick;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
-import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
+import me.lorenzo0111.rocketbans.commands.BukkitCommand;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.listeners.PlayerListener;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
+import me.lorenzo0111.rocketbans.platform.BukkitPlatform;
+import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.BanList;
@@ -18,16 +19,19 @@ import org.bukkit.ban.ProfileBanList;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
-public final class RocketBans extends JavaPlugin implements RocketBansAPI {
-    private static RocketBans instance;
+public final class RocketBans extends JavaPlugin implements RocketBansPlugin {
+    private PlatformAdapter platform;
+    private ConfigurationNode config;
     private boolean firstRun = true;
     private SQLHandler database;
     private MuteManager muteManager;
@@ -35,7 +39,9 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
     @Override
     @SuppressWarnings("ConstantConditions")
     public void onEnable() {
-        instance = this;
+        RocketBansProvider.set(this);
+
+        this.platform = new BukkitPlatform(this);
 
         if (new File(this.getDataFolder(), "config.yml").exists())
             this.firstRun = false;
@@ -51,10 +57,9 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         this.firstRun = false;
 
         // ******** Commands ********
-        this.getCommand("rocketbans").setExecutor(new RocketBansCommand(this));
+        this.getCommand("rocketbans").setExecutor(new BukkitCommand(this));
 
         // ******** Listeners ********
-        this.getServer().getPluginManager().registerEvents(this.muteManager, this);
         this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 
         // ******** Tasks ********
@@ -67,17 +72,13 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         try {
             this.getDatabase().close();
         } catch (Exception e) {
-            this.logException(e);
+            platform.logException(e);
         }
     }
 
     public void log(String message) {
         ConsoleCommandSender logger = Bukkit.getConsoleSender();
         logger.sendMessage(StringUtils.color(getMessage("prefix") + message));
-    }
-
-    public void logException(Throwable e) {
-        this.getLogger().log(Level.SEVERE, "An unexpected error occurred", e);
     }
 
     public String getMessage(String path, boolean messagesSection) {
@@ -92,22 +93,36 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         );
     }
 
+    @Override
     public String getMessage(String path) {
         return getMessage(path, true);
     }
 
+    @Override
     public List<String> getMessages(String path) {
         return getMessages(path, true);
     }
 
+    @Override
     public String getPrefixed(String path) {
         return getMessage("prefix") + StringUtils.color(
                 this.getConfig().getString("messages." + path, "&cUnable to find the following key: &7" + path + "&c.")
         );
     }
 
+    @Override
     public void reload() {
         this.reloadConfig();
+
+        try {
+            this.config = YamlConfigurationLoader.builder()
+                    .file(new File(this.getDataFolder(), "config.yml"))
+                    .build()
+                    .load();
+        } catch (ConfigurateException e) {
+            platform.logException(e);
+        }
+
         this.log("&c&m---------------------------------------------------");
         this.log("             &c&lRocket&e&lBans &7v" + this.getDescription().getVersion());
         this.log(" ");
@@ -134,12 +149,24 @@ public final class RocketBans extends JavaPlugin implements RocketBansAPI {
         this.log("&c&m---------------------------------------------------");
     }
 
-    public static RocketBans getInstance() {
-        return instance;
+    @Override
+    public String getVersion() {
+        return this.getDescription().getVersion();
     }
 
+    @Override
     public SQLHandler getDatabase() {
         return database;
+    }
+
+    @Override
+    public ConfigurationNode getConfiguration() {
+        return config;
+    }
+
+    @Override
+    public PlatformAdapter getPlatform() {
+        return platform;
     }
 
     @Override
