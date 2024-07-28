@@ -1,0 +1,18 @@
+repositories {
+    mavenCentral()
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://repo.xenondevs.xyz/releases' }
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':common')
+    implementation 'org.bstats:bstats-bukkit:3.0.2'
+    implementation 'xyz.xenondevs.invui:invui:1.33'
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
+}
+
+shadowJar {
+    relocate("xyz.xenondevs.invui", "${libsBase}.invui")
+    relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.inventoryaccess")
+}

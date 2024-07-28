@@ -1,10 +1,8 @@
 package me.lorenzo0111.rocketbans.commands.subcommands;
 
 import me.lorenzo0111.rocketbans.api.data.Table;
-import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.commands.RocketBansCommand;
 import me.lorenzo0111.rocketbans.commands.SubCommand;
-import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -12,7 +10,6 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class DeleteCommand extends SubCommand {
 

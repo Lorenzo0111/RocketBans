@@ -1,6 +1,6 @@
 package me.lorenzo0111.rocketbans.utils;
 
-import net.md_5.bungee.api.ChatColor;
+import me.lorenzo0111.rocketbans.RocketBansProvider;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,11 +15,11 @@ public final class StringUtils {
 
         while (matcher.find()) {
             String color = message.substring(matcher.start(), matcher.end());
-            message = message.replace(color, ChatColor.of(color.replace("&", "")) + "");
+            message = message.replace(color, RocketBansProvider.get().nativeColorOf(color.replace("&", "")));
             matcher = PATTERN.matcher(message);
         }
 
-        return ChatColor.translateAlternateColorCodes('&', message);
+        return RocketBansProvider.get().nativeColor(message);
     }
 
     public static List<String> color(List<String> messages) {

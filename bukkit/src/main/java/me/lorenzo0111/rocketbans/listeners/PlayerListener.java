@@ -2,11 +2,13 @@ package me.lorenzo0111.rocketbans.listeners;
 
 import me.lorenzo0111.rocketbans.RocketBans;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
+import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import me.lorenzo0111.rocketbans.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 import java.util.List;
@@ -45,5 +47,17 @@ public class PlayerListener implements Listener {
                                 .toList()
                 )
         );
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        if (!plugin.getMuteManager().getMutes().containsKey(event.getPlayer().getUniqueId())) return;
+
+        Mute mute = plugin.getMuteManager().getMutes().get(event.getPlayer().getUniqueId());
+        if (mute.expired() && mute.active())
+            mute.expire();
+
+        event.setCancelled(true);
+        event.getPlayer().sendMessage(plugin.getPrefixed("mute.deny"));
     }
 }

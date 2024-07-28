@@ -15,20 +15,20 @@ public class HelpCommand extends SubCommand {
     @Override
     public void handle(CommandSender sender, String label, String[] args) {
         String prefix = plugin.getMessage("prefix");
-        sender.sendMessage(color(prefix + "&c&m-------------------------------"));
-        sender.sendMessage(color(prefix + "&c&lRocket&e&lBans &7v" + plugin.getDescription().getVersion()));
+        sender.sendMessage(StringUtils.color(prefix + "&c&m-------------------------------"));
+        sender.sendMessage(StringUtils.color(prefix + "&c&lRocket&e&lBans &7v" + plugin.getDescription().getVersion()));
         sender.sendMessage(prefix);
-        sender.sendMessage(color(prefix + "&7Available commands:"));
+        sender.sendMessage(StringUtils.color(prefix + "&7Available commands:"));
 
         for (SubCommand subCommand : command.getSubCommands()) {
             if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
                 continue;
             }
 
-            sender.sendMessage(color(prefix + "&c/rb " + subCommand.getUsage() + " &7- " + subCommand.getDescription()));
+            sender.sendMessage(StringUtils.color(prefix + "&c/rb " + subCommand.getUsage() + " &7- " + subCommand.getDescription()));
         }
 
-        sender.sendMessage(color(prefix + "&c&m-------------------------------"));
+        sender.sendMessage(StringUtils.color(prefix + "&c&m-------------------------------"));
     }
 
     @Override

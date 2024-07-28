@@ -2,12 +2,11 @@ package me.lorenzo0111.rocketbans.data;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.RocketBansPlugin;
 import me.lorenzo0111.rocketbans.api.data.ExpiringRecord;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.data.Table;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,31 +17,31 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class SQLHandler {
-    private final RocketBans plugin;
+    private final RocketBansPlugin plugin;
     private final Executor executor;
     private HikariDataSource dataSource;
 
-    public SQLHandler(RocketBans plugin) {
+    public SQLHandler(RocketBansPlugin plugin) {
         this.plugin = plugin;
-        this.executor = (cmd) -> Bukkit.getScheduler().runTaskAsynchronously(plugin, cmd);
+        this.executor = plugin::async;
     }
 
-    public void init() throws SQLException {
-        ConfigurationSection cs = this.plugin.getConfig().getConfigurationSection("mysql");
+    public void init(ConfigurationNode config) throws SQLException {
+        ConfigurationNode cs = config.node("mysql");
         Objects.requireNonNull(cs, "Unable to find the following key: mysql");
-        HikariConfig config = new HikariConfig();
+        HikariConfig hikari = new HikariConfig();
 
-        config.setJdbcUrl("jdbc:mysql://" + cs.getString("host") + ":" + cs.getString("port") + "/" + cs.getString("database"));
-        config.setUsername(cs.getString("username"));
-        config.setPassword(cs.getString("password"));
-        config.setConnectionTimeout(10000);
-        config.setLeakDetectionThreshold(10000);
-        config.setMaximumPoolSize(10);
-        config.setMaxLifetime(60000);
-        config.setPoolName("RocketBansPool");
-        config.addDataSourceProperty("useSSL", cs.getBoolean("ssl"));
+        hikari.setJdbcUrl("jdbc:mysql://" + cs.node("host").getString() + ":" + cs.node("port").getInt() + "/" + cs.node("database").getString(""));
+        hikari.setUsername(cs.node("username").getString());
+        hikari.setPassword(cs.node("password").getString());
+        hikari.setConnectionTimeout(10000);
+        hikari.setLeakDetectionThreshold(10000);
+        hikari.setMaximumPoolSize(10);
+        hikari.setMaxLifetime(60000);
+        hikari.setPoolName("RocketBansPool");
+        hikari.addDataSourceProperty("useSSL", cs.node("ssl").getBoolean());
 
-        this.dataSource = new HikariDataSource(config);
+        this.dataSource = new HikariDataSource(hikari);
         this.createTables();
     }
 

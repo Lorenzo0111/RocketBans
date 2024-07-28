@@ -1,62 +1,48 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'java'
     id "io.github.goooler.shadow" version "8.1.8"
 }
 
-group = 'me.lorenzo0111'
 version = '1.0-SNAPSHOT'
 
-String libsBase = "${group}.rocketbans.libs"
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.github.goooler.shadow'
 
-repositories {
-    mavenCentral()
-    maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    group = 'me.lorenzo0111'
+    version = rootProject.version
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
     }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
+
+    ext {
+        libsBase = "me.lorenzo0111.rocketbans.libs"
     }
-    maven {
-        name = "CodeMC"
-        url = "https://repo.codemc.io/repository/maven-public/"
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     }
-    maven {
-        name = "xenondevs"
-        url = "https://repo.xenondevs.xyz/releases"
+
+    dependencies {
+        compileOnly('org.jetbrains:annotations:24.1.0')
+        implementation('org.spongepowered:configurate-yaml:4.1.2')
     }
-    maven { url = "https://repo.onarandombox.com/content/groups/public/" }
-}
 
-dependencies {
-    compileOnly "org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT"
-    implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation 'xyz.xenondevs.invui:invui:1.33'
+    shadowJar {
+        relocate("org.spongepowered.configurate", "${libsBase}configurate")
 
-    implementation project(":api")
-}
+        archiveFileName = "RocketBans-${project.name}-${project.version}.jar"
+    }
 
-
-shadowJar {
-    archiveClassifier.set("")
-
-    relocate("com.zaxxer.hikari", "${libsBase}.hikari")
-    relocate("xyz.xenondevs.invui", "${libsBase}.invui")
-    relocate("xyz.xenondevs.inventoryaccess", "${libsBase}.inventoryaccess")
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
+    processResources {
+        from(sourceSets.main.resources.srcDirs) {
+            duplicatesStrategy DuplicatesStrategy.INCLUDE
+            inputs.property 'version', version
+            filter ReplaceTokens, tokens: [version: version]
+        }
     }
 }
-
-tasks.build.dependsOn tasks.shadowJar

@@ -1,26 +1,23 @@
 package me.lorenzo0111.rocketbans.commands;
 
-import me.lorenzo0111.rocketbans.RocketBans;
+import me.lorenzo0111.rocketbans.RocketBansPlugin;
 import me.lorenzo0111.rocketbans.commands.exceptions.OnlyPlayersException;
 import me.lorenzo0111.rocketbans.commands.exceptions.UsageException;
 import me.lorenzo0111.rocketbans.commands.subcommands.*;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import me.lorenzo0111.rocketbans.entity.AbstractSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RocketBansCommand implements TabExecutor {
-    private final RocketBans plugin;
+public class RocketBansCommand {
+    private final RocketBansPlugin plugin;
     private final List<SubCommand> subCommands = new ArrayList<>();
 
-    public RocketBansCommand(RocketBans plugin) {
+    public RocketBansCommand(RocketBansPlugin plugin) {
         this.plugin = plugin;
 
         register(new HelpCommand(this));
@@ -55,20 +52,19 @@ public class RocketBansCommand implements TabExecutor {
         }));
     }
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public void handleCommand(@NotNull AbstractSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         SubCommand subCommand = getSubCommand(label);
         if (subCommand instanceof NotFoundCommand)
             subCommand = null;
 
         if (subCommand == null && args.length == 0) {
             this.runSubCommand(sender, getSubCommand("help"), label, args);
-            return true;
+            return;
         }
 
         if (subCommand != null) {
             this.runSubCommand(sender, subCommand, label, args);
-            return true;
+            return;
         }
 
         subCommand = getSubCommand(args[0]);
@@ -76,10 +72,9 @@ public class RocketBansCommand implements TabExecutor {
         System.arraycopy(args, 1, newArgs, 0, args.length - 1);
 
         this.runSubCommand(sender, subCommand, label, newArgs);
-        return true;
     }
 
-    private void runSubCommand(CommandSender sender, SubCommand command, String label, String[] args) {
+    private void runSubCommand(AbstractSender sender, SubCommand command, String label, String[] args) {
         if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
             sender.sendMessage(plugin.getPrefixed("no-permission"));
             return;
@@ -117,7 +112,7 @@ public class RocketBansCommand implements TabExecutor {
         return new NotFoundCommand(this);
     }
 
-    public RocketBans getPlugin() {
+    public RocketBansPlugin getPlugin() {
         return plugin;
     }
 
@@ -129,7 +124,6 @@ public class RocketBansCommand implements TabExecutor {
         return subCommands;
     }
 
-    @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         SubCommand cmd = getSubCommand(label);
         if (cmd instanceof NotFoundCommand)

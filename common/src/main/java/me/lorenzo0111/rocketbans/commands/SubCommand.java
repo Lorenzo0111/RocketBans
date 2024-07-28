@@ -1,15 +1,14 @@
 package me.lorenzo0111.rocketbans.commands;
 
-import me.lorenzo0111.rocketbans.RocketBans;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import me.lorenzo0111.rocketbans.RocketBansPlugin;
+import me.lorenzo0111.rocketbans.entity.AbstractPlayer;
+import me.lorenzo0111.rocketbans.entity.AbstractSender;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SubCommand {
-    protected final RocketBans plugin;
+    protected final RocketBansPlugin plugin;
     protected final RocketBansCommand command;
 
     public SubCommand(RocketBansCommand command) {
@@ -17,20 +16,20 @@ public abstract class SubCommand {
         this.plugin = command.getPlugin();
     }
 
-    public void handle(CommandSender sender, String[] args) {
+    public void handle(AbstractSender sender, String[] args) {
         throw new UnsupportedOperationException("This command is not implemented yet.");
     }
 
-    public void handle(CommandSender sender, String label, String[] args) {
+    public void handle(AbstractSender sender, String label, String[] args) {
         this.handle(sender, args);
     }
 
-    public List<String> handleTabCompletion(CommandSender sender, String[] args) {
+    public List<String> handleTabCompletion(AbstractSender sender, String[] args) {
         return new ArrayList<>();
     }
 
     protected List<String> playerNames() {
-        return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+        return plugin.getPlayerList().stream().map(AbstractPlayer::getName).toList();
     }
 
     public abstract String getName();
