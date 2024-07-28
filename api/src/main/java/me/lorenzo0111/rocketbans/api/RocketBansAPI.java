@@ -2,8 +2,6 @@ package me.lorenzo0111.rocketbans.api;
 
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.managers.IMuteManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,8 +18,4 @@ public interface RocketBansAPI {
     CompletableFuture<List<HistoryRecord>> history(@Nullable Class<? extends HistoryRecord> type, UUID uuid);
 
     IMuteManager getMuteManager();
-
-    static @NotNull RocketBansAPI get() {
-        return (RocketBansAPI) JavaPlugin.getProvidingPlugin(RocketBansAPI.class);
-    }
 }

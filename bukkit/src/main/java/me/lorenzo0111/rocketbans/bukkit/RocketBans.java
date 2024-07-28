@@ -2,7 +2,7 @@ package me.lorenzo0111.rocketbans.bukkit;
 
 import me.lorenzo0111.rocketbans.bukkit.listeners.PlayerListener;
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Kick;
@@ -15,6 +15,7 @@ import me.lorenzo0111.rocketbans.bukkit.platform.BukkitPlatform;
 import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ban.ProfileBanList;
@@ -51,6 +52,8 @@ public final class RocketBans extends JavaPlugin implements RocketBansPlugin {
         this.saveDefaultConfig();
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
+
+        new Metrics(this, 22812);
 
         this.database = new SQLHandler(this);
         this.muteManager = new MuteManager(this);

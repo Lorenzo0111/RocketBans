@@ -2,7 +2,7 @@ package me.lorenzo0111.rocketbans.bukkit.gui.menus;
 
 import me.lorenzo0111.rocketbans.bukkit.gui.items.NavigationItem;
 import me.lorenzo0111.rocketbans.bukkit.RocketBans;
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

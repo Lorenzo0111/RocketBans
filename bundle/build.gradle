@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(':bukkit')
+    implementation project(':bungeecord')
+    implementation project(':velocity')
+}
+
+shadowJar {
+    archiveFileName = "RocketBans.jar"
+}

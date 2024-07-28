@@ -1,6 +1,6 @@
 package me.lorenzo0111.rocketbans.api.data;
 
-import me.lorenzo0111.rocketbans.api.RocketBansAPI;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ public interface ExpiringRecord extends HistoryRecord {
     }
 
     default void expire() {
-        RocketBansAPI.get().expire(this.getClass(), id());
+        RocketBansProvider.get().expire(this.getClass(), id());
     }
 
     @Contract("_ -> new")

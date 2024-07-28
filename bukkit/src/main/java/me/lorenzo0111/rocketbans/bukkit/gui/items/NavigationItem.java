@@ -1,7 +1,7 @@
 package me.lorenzo0111.rocketbans.bukkit.gui.items;
 
 import me.lorenzo0111.rocketbans.bukkit.RocketBans;
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

@@ -1,7 +1,7 @@
 package me.lorenzo0111.rocketbans.bungee;
 
 import me.lorenzo0111.rocketbans.RocketBansPlugin;
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import me.lorenzo0111.rocketbans.api.data.HistoryRecord;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.api.data.records.Kick;
@@ -18,12 +18,17 @@ import me.lorenzo0111.rocketbans.utils.StringUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.bstats.bungeecord.Metrics;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +44,6 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
     private MuteManager muteManager;
 
     @Override
-    @SuppressWarnings("ConstantConditions")
     public void onEnable() {
         RocketBansProvider.set(this);
 
@@ -48,7 +52,13 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
         if (new File(this.getDataFolder(), "config.yml").exists())
             this.firstRun = false;
 
-        // todo: extract config
+        try {
+            this.extractConfig();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        new Metrics(this, 22813);
 
         this.database = new SQLHandler(this);
         this.muteManager = new MuteManager(this);
@@ -86,14 +96,20 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
 
     public String getMessage(String path, boolean messagesSection) {
         return StringUtils.color(
-                this.getConfig().getString(messagesSection ? "messages." + path : path, "&cUnable to find the following key: &7" + path + "&c.")
+                this.getConfiguration().node((Object[]) (messagesSection ? "messages." + path : path).split("\\.")).getString("&cUnable to find the following key: &7" + path + "&c.")
         );
     }
 
     public List<String> getMessages(String path, boolean messagesSection) {
-        return StringUtils.color(
-                this.getConfig().getStringList(messagesSection ? "messages." + path : path)
-        );
+        try {
+            return StringUtils.color(
+                    this.getConfiguration()
+                            .node((Object[]) (messagesSection ? "messages." + path : path).split("\\."))
+                            .getList(String.class, new ArrayList<>())
+            );
+        } catch (SerializationException e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
@@ -109,14 +125,12 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
     @Override
     public String getPrefixed(String path) {
         return getMessage("prefix") + StringUtils.color(
-                this.getConfig().getString("messages." + path, "&cUnable to find the following key: &7" + path + "&c.")
+                this.getConfiguration().node((Object[]) ("messages." + path).split("\\.")).getString("&cUnable to find the following key: &7" + path + "&c.")
         );
     }
 
     @Override
     public void reload() {
-        this.reloadConfig();
-
         try {
             this.config = YamlConfigurationLoader.builder()
                     .file(new File(this.getDataFolder(), "config.yml"))
@@ -185,13 +199,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
             muteManager.addMute((Mute) item);
 
         if (item instanceof Ban ban)
-            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
-                    .addBan(
-                            Bukkit.getOfflinePlayer(item.uuid()).getPlayerProfile(),
-                            item.reason(),
-                            ban.expires(),
-                            ban.executor().toString()
-                    );
+            platform.ban(platform.getPlayer(ban.uuid()), ban.reason(), ban.expires(), ban.executor());
     }
 
     @Override
@@ -202,8 +210,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
             muteManager.removeMutes(uuid);
 
         if (type.equals(Ban.class))
-            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE))
-                    .pardon(Bukkit.getOfflinePlayer(uuid).getPlayerProfile());
+            platform.unban(platform.getPlayer(uuid));
     }
 
     @Override
@@ -233,4 +240,20 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
             return records;
         }, database.getExecutor());
     }
+
+    private void extractConfig() throws IOException {
+        if (!getDataFolder().exists()) {
+            getLogger().info("Created config folder: " + getDataFolder().mkdir());
+        }
+
+        File configFile = new File(getDataFolder(), "config.yml");
+
+        if (!configFile.exists()) {
+            FileOutputStream outputStream = new FileOutputStream(configFile);
+            InputStream in = getResourceAsStream("config.yml");
+            in.transferTo(outputStream);
+            in.close();
+        }
+    }
+
 }

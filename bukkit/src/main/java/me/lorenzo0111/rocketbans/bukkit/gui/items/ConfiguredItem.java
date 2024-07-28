@@ -1,7 +1,7 @@
 package me.lorenzo0111.rocketbans.bukkit.gui.items;
 
 import me.lorenzo0111.rocketbans.bukkit.RocketBans;
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 import org.bukkit.Material;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.AbstractItemBuilder;
@@ -29,21 +29,21 @@ public abstract class ConfiguredItem extends AbstractItem {
         AbstractItemBuilder<?> builder = overrideBase();
 
         if (builder == null) {
-            Material type = Material.getMaterial(plugin.getConfig().getString("menus.items." + this.id + ".type", "BARRIER"));
+            Material type = Material.getMaterial(plugin.getConfiguration().node("menus", "items", this.id, "type").getString("BARRIER"));
             if (type == null) type = Material.BARRIER;
 
             if (type.equals(Material.PLAYER_HEAD)) {
-                builder = new SkullBuilder(new SkullBuilder.HeadTexture(plugin.getConfig().getString("menus.items." + this.id + ".texture", "")));
+                builder = new SkullBuilder(new SkullBuilder.HeadTexture(plugin.getConfiguration().node("menus", "items", this.id, "texture").getString("")));
             } else {
                 builder = new ItemBuilder(type);
             }
         }
 
-        if (plugin.getConfig().contains("menus.items." + this.id + ".name")) {
+        if (!plugin.getConfiguration().node("menus", "items", this.id, "name").virtual()) {
             builder.setDisplayName(replacePlaceholders(plugin.getMessage("menus.items." + this.id + ".name", false)));
         }
 
-        if (plugin.getConfig().contains("menus.items." + this.id + ".lore")) {
+        if (!plugin.getConfiguration().node("menus", "items", this.id, "lore").virtual()) {
             List<String> lore = plugin.getMessages("menus.items." + this.id + ".lore", false)
                     .stream()
                     .map(this::replacePlaceholders)

@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.utils;
 
-import me.lorenzo0111.rocketbans.RocketBansProvider;
+import me.lorenzo0111.rocketbans.RocketBansPlugin;
+import me.lorenzo0111.rocketbans.api.RocketBansProvider;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,11 +16,11 @@ public final class StringUtils {
 
         while (matcher.find()) {
             String color = message.substring(matcher.start(), matcher.end());
-            message = message.replace(color, RocketBansProvider.get().getPlatform().nativeColorOf(color.replace("&", "")));
+            message = message.replace(color, ((RocketBansPlugin) RocketBansProvider.get()).getPlatform().nativeColorOf(color.replace("&", "")));
             matcher = PATTERN.matcher(message);
         }
 
-        return RocketBansProvider.get().getPlatform().nativeColor(message);
+        return ((RocketBansPlugin) RocketBansProvider.get()).getPlatform().nativeColor(message);
     }
 
     public static List<String> color(List<String> messages) {

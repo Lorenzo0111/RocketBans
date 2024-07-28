@@ -1,3 +1,3 @@
 rootProject.name = 'RocketBans'
 
-include(':common',':api',':bukkit',':bungeecord')
+include(':common',':api',':bukkit',':bungeecord', ':bundle', ':velocity')
