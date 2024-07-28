@@ -1,5 +1,6 @@
 package me.lorenzo0111.rocketbans.bungee.platform;
 
+import me.lorenzo0111.rocketbans.api.data.records.Ban;
 import me.lorenzo0111.rocketbans.bungee.RocketBans;
 import me.lorenzo0111.rocketbans.bungee.platform.entity.BungeeAdapter;
 import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
@@ -9,6 +10,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -51,12 +53,21 @@ public class BungeePlatform implements PlatformAdapter {
 
     @Override
     public void unban(AbstractPlayer<?> player) {
-        // TODO
+        plugin.getDatabase().expireAll(Ban.class, player.getUniqueId());
+        plugin.getBanManager().removeBan(player.getUniqueId());
     }
 
     @Override
     public void ban(AbstractPlayer<?> player, String reason, Date duration, UUID executor) {
-        // TODO
+        plugin.getDatabase().add(new Ban(
+                -1,
+                player.getUniqueId(),
+                reason,
+                executor,
+                new Timestamp(new Date().getTime()),
+                new Timestamp(duration.getTime()),
+                true
+        ));
     }
 
     @Override
@@ -66,8 +77,10 @@ public class BungeePlatform implements PlatformAdapter {
 
     @Override
     public List<AbstractPlayer<?>> getBanList() {
-        // todo
-        return new ArrayList<>();
+        return new ArrayList<>(plugin.getBanManager().getBans()
+                .keySet().stream()
+                .map(this::getPlayer)
+                .toList());
     }
 
     @Override

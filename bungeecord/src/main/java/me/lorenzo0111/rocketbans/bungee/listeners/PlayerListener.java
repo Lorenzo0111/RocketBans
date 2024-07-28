@@ -12,8 +12,6 @@ import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.util.List;
-
 public class PlayerListener implements Listener {
     private final RocketBans plugin;
 
@@ -23,10 +21,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onLogin(PreLoginEvent event) {
-        List<Ban> bans = plugin.getDatabase().get(Ban.class, event.getConnection().getUniqueId(), true).join();
-        if (bans.isEmpty()) return;
+        if (!plugin.getBanManager().isBanned(event.getConnection().getUniqueId())) return;
 
-        Ban ban = bans.getFirst();
+        Ban ban = plugin.getBanManager().getBans().get(event.getConnection().getUniqueId());
         event.setCancelled(true);
         event.setCancelReason(
                 new TextComponent(

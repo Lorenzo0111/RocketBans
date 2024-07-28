@@ -1,4 +1,17 @@
 dependencies {
+    implementation project(':api')
+    implementation project(':common')
     compileOnly 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
     annotationProcessor 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
 }
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+tasks.register('processSources', Sync) {
+    from sourceSets.main.java.srcDirs
+    inputs.property 'version', version
+    filter ReplaceTokens, tokens: [version: version]
+    into "$buildDir/src"
+}
+
+compileJava.source = processSources.outputs

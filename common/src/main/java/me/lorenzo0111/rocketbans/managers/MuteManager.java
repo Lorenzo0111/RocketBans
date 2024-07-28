@@ -19,6 +19,8 @@ public class MuteManager implements IMuteManager {
     @Override
     public void reload() {
         plugin.getDatabase().getActive(Mute.class).thenAccept(mutes -> {
+            activeMutes.clear();
+
             for (Mute mute : mutes) {
                 activeMutes.put(mute.uuid(), mute);
             }

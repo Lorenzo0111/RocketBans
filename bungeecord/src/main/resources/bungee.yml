@@ -1,1 +1,4 @@
 name: RocketBans
+version: @version@
+main: me.lorenzo0111.rocketbans.bungee.RocketBans
+author: Lorenzo0111

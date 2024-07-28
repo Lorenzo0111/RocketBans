@@ -9,6 +9,7 @@ import me.lorenzo0111.rocketbans.api.data.records.Mute;
 import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.bungee.commands.BungeeCommand;
 import me.lorenzo0111.rocketbans.bungee.listeners.PlayerListener;
+import me.lorenzo0111.rocketbans.bungee.managers.BanManager;
 import me.lorenzo0111.rocketbans.bungee.platform.BungeePlatform;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
@@ -42,6 +43,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
     private boolean firstRun = true;
     private SQLHandler database;
     private MuteManager muteManager;
+    private BanManager banManager;
 
     @Override
     public void onEnable() {
@@ -62,6 +64,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
 
         this.database = new SQLHandler(this);
         this.muteManager = new MuteManager(this);
+        this.banManager = new BanManager(this);
 
         this.reload();
         this.firstRun = false;
@@ -77,6 +80,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
 
         // ******** Tasks ********
         this.getProxy().getScheduler().schedule(this, new ActiveTask(this), 0, 1, TimeUnit.HOURS);
+        this.getProxy().getScheduler().schedule(this, banManager::reload, 0, 1, TimeUnit.HOURS);
     }
 
 
@@ -153,6 +157,7 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
             try {
                 this.database.init();
                 this.muteManager.reload();
+                this.banManager.reload();
                 this.log(" &cDatabase connection&7: &a&lSUCCESS");
             } catch (Exception e) {
                 this.log(" &cAn error occurred while connecting to the database.");
@@ -189,6 +194,10 @@ public final class RocketBans extends Plugin implements RocketBansPlugin {
     @Override
     public MuteManager getMuteManager() {
         return muteManager;
+    }
+
+    public BanManager getBanManager() {
+        return banManager;
     }
 
     @Override
