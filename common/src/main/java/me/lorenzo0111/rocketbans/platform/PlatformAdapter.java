@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface PlatformAdapter {
     String nativeColor(String message);
     String nativeColorOf(String message);
+    boolean supportsHex();
 
     void logException(Throwable exception);
     void async(Runnable runnable);

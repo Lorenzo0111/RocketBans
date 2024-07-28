@@ -1,6 +1,7 @@
 package me.lorenzo0111.rocketbans.velocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -17,7 +18,12 @@ import me.lorenzo0111.rocketbans.api.data.records.Warn;
 import me.lorenzo0111.rocketbans.data.SQLHandler;
 import me.lorenzo0111.rocketbans.managers.MuteManager;
 import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
+import me.lorenzo0111.rocketbans.tasks.ActiveTask;
 import me.lorenzo0111.rocketbans.utils.StringUtils;
+import me.lorenzo0111.rocketbans.velocity.commands.VelocityCommand;
+import me.lorenzo0111.rocketbans.velocity.listeners.PlayerListener;
+import me.lorenzo0111.rocketbans.velocity.managers.BanManager;
+import me.lorenzo0111.rocketbans.velocity.platform.VelocityPlatform;
 import net.kyori.adventure.text.Component;
 import org.bstats.velocity.Metrics;
 import org.jetbrains.annotations.Nullable;
@@ -32,11 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "rocketbans",
         name = "RocketBans",
@@ -53,6 +57,7 @@ public final class RocketBans implements RocketBansPlugin {
     private boolean firstRun = true;
     private SQLHandler database;
     private MuteManager muteManager;
+    private BanManager banManager;
 
     @Inject
     public RocketBans(Logger logger, @DataDirectory Path path, ProxyServer server, Metrics.Factory metricsFactory) {
@@ -62,9 +67,12 @@ public final class RocketBans implements RocketBansPlugin {
         this.metricsFactory = metricsFactory;
     }
 
+    @SuppressWarnings("unused")
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         RocketBansProvider.set(this);
+
+        this.platform = new VelocityPlatform(this);
 
         if (new File(path.toFile(), "config.yml").exists())
             this.firstRun = false;
@@ -79,15 +87,30 @@ public final class RocketBans implements RocketBansPlugin {
 
         this.database = new SQLHandler(this);
         this.muteManager = new MuteManager(this);
+        this.banManager = new BanManager(this);
 
         this.reload();
         this.firstRun = false;
 
         // ******** Commands ********
+        CommandMeta commandMeta = server.getCommandManager()
+                .metaBuilder("rocketbans")
+                .aliases("rb", "ban", "tempban", "unban",
+                        "kick", "mute", "tempmute", "unmute", "history")
+                .plugin(this)
+                .build();
+        server.getCommandManager().register(commandMeta, new VelocityCommand(this));
 
         // ******** Listeners ********
+        server.getEventManager().register(this, new PlayerListener(this));
 
         // ******** Tasks ********
+        server.getScheduler().buildTask(this, new ActiveTask(this))
+                .repeat(1, TimeUnit.HOURS)
+                .schedule();
+        server.getScheduler().buildTask(this, banManager::reload)
+                .repeat(1, TimeUnit.HOURS)
+                .schedule();
     }
 
     public void log(String message) {
@@ -154,6 +177,7 @@ public final class RocketBans implements RocketBansPlugin {
             try {
                 this.database.init();
                 this.muteManager.reload();
+                this.banManager.reload();
                 this.log(" &cDatabase connection&7: &a&lSUCCESS");
             } catch (Exception e) {
                 this.log(" &cAn error occurred while connecting to the database.");
@@ -190,6 +214,18 @@ public final class RocketBans implements RocketBansPlugin {
     @Override
     public MuteManager getMuteManager() {
         return muteManager;
+    }
+
+    public BanManager getBanManager() {
+        return banManager;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public ProxyServer getServer() {
+        return server;
     }
 
     @Override

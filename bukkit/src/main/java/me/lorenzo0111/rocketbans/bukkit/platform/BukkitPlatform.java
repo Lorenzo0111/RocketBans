@@ -33,6 +33,11 @@ public class BukkitPlatform implements PlatformAdapter {
     }
 
     @Override
+    public boolean supportsHex() {
+        return true;
+    }
+
+    @Override
     public void logException(Throwable e) {
         plugin.getLogger().log(Level.SEVERE, "An unexpected error occurred", e);
     }

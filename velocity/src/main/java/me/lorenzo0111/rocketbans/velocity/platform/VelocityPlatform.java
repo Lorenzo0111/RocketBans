@@ -1,59 +1,65 @@
-package me.lorenzo0111.rocketbans.bungee.platform;
+package me.lorenzo0111.rocketbans.velocity.platform;
 
+import com.velocitypowered.api.proxy.Player;
 import me.lorenzo0111.rocketbans.api.data.records.Ban;
-import me.lorenzo0111.rocketbans.bungee.RocketBans;
-import me.lorenzo0111.rocketbans.bungee.platform.entity.BungeeAdapter;
 import me.lorenzo0111.rocketbans.platform.PlatformAdapter;
 import me.lorenzo0111.rocketbans.platform.entity.AbstractPlayer;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import me.lorenzo0111.rocketbans.velocity.RocketBans;
+import me.lorenzo0111.rocketbans.velocity.platform.entity.VelocityAdapter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
-public class BungeePlatform implements PlatformAdapter {
+public class VelocityPlatform implements PlatformAdapter {
     private final RocketBans plugin;
+    private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
 
-    public BungeePlatform(RocketBans plugin) {
+    public VelocityPlatform(RocketBans plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public String nativeColor(String message) {
-        return ChatColor.translateAlternateColorCodes('&', message);
+        return serializer.serialize(serializer.deserialize(message));
     }
 
     @Override
     public String nativeColorOf(String message) {
-        return ChatColor.of(message).toString();
+        return message;
     }
 
     @Override
     public boolean supportsHex() {
-        return true;
+        return false;
     }
 
     @Override
     public void logException(Throwable e) {
-        plugin.getLogger().log(Level.SEVERE, "An unexpected error occurred", e);
+        plugin.getLogger().error("An unexpected error occurred", e);
     }
 
     @Override
     public void async(Runnable runnable) {
-        plugin.getProxy().getScheduler().runAsync(plugin, runnable);
+        plugin.getServer().getScheduler().buildTask(plugin, runnable).schedule();
     }
 
     @Override
     public void dispatchCommand(String command) {
-        plugin.getProxy().getPluginManager().dispatchCommand(plugin.getProxy().getConsole(), command);
+        plugin.getServer().getCommandManager().executeAsync(plugin.getServer().getConsoleCommandSource(), command);
     }
 
     @Override
     public void broadcast(String message) {
-        plugin.getProxy().broadcast(new TextComponent(message));
+        Component component = serializer.deserialize(message);
+        for (Player player : plugin.getServer().getAllPlayers()) {
+            player.sendMessage(component);
+        }
     }
 
     @Override
@@ -77,7 +83,7 @@ public class BungeePlatform implements PlatformAdapter {
 
     @Override
     public void kick(AbstractPlayer<?> player, String reason) {
-        adapt(player).disconnect(new TextComponent(reason));
+        adapt(player).disconnect(Component.text(reason));
     }
 
     @Override
@@ -90,24 +96,24 @@ public class BungeePlatform implements PlatformAdapter {
 
     @Override
     public List<AbstractPlayer<?>> getPlayerList() {
-        return new ArrayList<>(plugin.getProxy().getPlayers().stream()
-                .map(BungeeAdapter::player)
+        return new ArrayList<>(plugin.getServer().getAllPlayers().stream()
+                .map(VelocityAdapter::player)
                 .toList());
     }
 
     @Override
     public AbstractPlayer<?> getPlayer(String name) {
-        ProxiedPlayer player = plugin.getProxy().getPlayer(name);
-        return BungeeAdapter.player(player);
+        Player player = plugin.getServer().getPlayer(name).orElse(null);
+        return VelocityAdapter.player(player);
     }
 
     @Override
     public AbstractPlayer<?> getPlayer(UUID uuid) {
-        ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
-        return BungeeAdapter.player(player);
+        Player player = plugin.getServer().getPlayer(uuid).orElse(null);
+        return VelocityAdapter.player(player);
     }
 
-    private ProxiedPlayer adapt(@NotNull AbstractPlayer<?> player) {
-        return (ProxiedPlayer) player.getHandle();
+    private Player adapt(@NotNull AbstractPlayer<?> player) {
+        return (Player) player.getHandle();
     }
 }

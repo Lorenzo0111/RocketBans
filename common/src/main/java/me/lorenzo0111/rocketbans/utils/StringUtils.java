@@ -12,12 +12,14 @@ public final class StringUtils {
     private static final Pattern PATTERN = Pattern.compile("&#[a-fA-F0-9]{6}");
 
     public static String color(String message) {
-        Matcher matcher = PATTERN.matcher(message);
+        if (((RocketBansPlugin) RocketBansProvider.get()).getPlatform().supportsHex()) {
+            Matcher matcher = PATTERN.matcher(message);
 
-        while (matcher.find()) {
-            String color = message.substring(matcher.start(), matcher.end());
-            message = message.replace(color, ((RocketBansPlugin) RocketBansProvider.get()).getPlatform().nativeColorOf(color.replace("&", "")));
-            matcher = PATTERN.matcher(message);
+            while (matcher.find()) {
+                String color = message.substring(matcher.start(), matcher.end());
+                message = message.replace(color, ((RocketBansPlugin) RocketBansProvider.get()).getPlatform().nativeColorOf(color.replace("&", "")));
+                matcher = PATTERN.matcher(message);
+            }
         }
 
         return ((RocketBansPlugin) RocketBansProvider.get()).getPlatform().nativeColor(message);
